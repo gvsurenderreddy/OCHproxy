@@ -7,7 +7,7 @@ dls = 0
 
 
 def needs():
-    return ["hoster/share-online/user", "hoster/share-online/password"]
+    return ["hoster/ShareOnline/user", "hoster/ShareOnline/password"]
 
 
 def priority():

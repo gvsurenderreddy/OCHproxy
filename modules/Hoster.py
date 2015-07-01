@@ -2,7 +2,7 @@ from pluginbase import PluginBase
 from modules.Config import Config
 
 
-def has_all_needed(hoster):
+def configured(hoster):
     need = hoster.needs()
     for n in need:
         if not Config.get(n):
@@ -23,7 +23,11 @@ class Hoster:
         with plugin_source:
             for p in plugin_source.list_plugins():
                 h = plugin_source.load_plugin(p)
-                self.hoster.append(h)
+                if h.match is None or h.handle is None or h.priority is None:
+                    continue
+                self.hoster.append((p, h))
+                if h.needs is None:
+                    continue
                 for n in h.needs():
                     if not Config.get(n):
                         n = n.split("/")[-1]
@@ -32,7 +36,8 @@ class Hoster:
                                                                                "to use the plugin (no restart needed)."
 
     def handle_link(self, link):
-        okay = [h for h in self.hoster if h.match is not None and h.match(link) and has_all_needed(h)]
+        okay = [h[1] for h in self.hoster if
+                h.match(link) and configured(h) and Config.get("hoster/" + h[0] + "/active", False)]
         if len(okay) < 1:
             print "Can't handle link", link, "because no hoster wants to do it"
             return None

@@ -44,7 +44,7 @@ supported = [
 
 
 def needs():
-    return ["hoster/debriditalia/password", "hoster/debriditalia/user"]
+    return ["hoster/DebridItalia/password", "hoster/DebridItalia/user"]
 
 
 def priority():
