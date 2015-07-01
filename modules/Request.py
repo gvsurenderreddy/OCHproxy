@@ -12,9 +12,7 @@ def get_user_agent():
 
 
 class Request:
-    method = "GET"
-    url = None
-    payload = {}
+    cookies = {}
 
     def __init__(self, url=None, payload=None, method="GET"):
         self.method = method
@@ -41,18 +39,52 @@ class Request:
 
     def open(self):
         opener = urllib2.build_opener()
+        host = Request.get_host_from_url(self.url)
         user_agent = get_user_agent()
         opener.addheaders = [("User-Agent", user_agent)]
+        opener.addheaders.append(
+            ('Cookie', "; ".join('%s=%s' % (k, v) for k, v in Request.get_cookies_for(host).items())))
         if self.get_method() == "GET":
             url = self.url
             if len(self.payload) > 0:
                 url = url + "?" + urllib.urlencode(self.payload)
-            return opener.open(url)
+            r = opener.open(url)
         else:
-            return opener.open(self.url, data=self.payload)
+            r = opener.open(self.url, data=self.payload)
+        try:
+            cookies = r.getheader('Set-Cookie').split(";")
+            for c in cookies:
+                n, v = c.split(":")
+                Request.set_cookie_for(host, n, v)
+        except AttributeError:
+            pass
+        return r
 
     def send(self):
-        if self.method == "GET":
-            return requests.get(self.url, params=self.payload, headers={"User-Agent": get_user_agent()})
-        elif self.method == "POST":
-            return requests.post(self.url, data=self.payload, headers={"User-Agent": get_user_agent()})
+        host = Request.get_host_from_url(self.url)
+        if self.method != "POST":
+            r = requests.get(self.url, params=self.payload, headers={"User-Agent": get_user_agent()},
+                             cookies=Request.get_cookies_for(host))
+        else:
+            r = requests.post(self.url, data=self.payload, headers={"User-Agent": get_user_agent()},
+                              cookies=Request.get_cookies_for(host))
+        for n, v in r.cookies.iteritems():
+            Request.set_cookie_for(host, n, v)
+        return r
+
+    @staticmethod
+    def set_cookie_for(host, name, value):
+        if host not in Request.cookies:
+            Request.cookies[host] = {}
+        Request.cookies[host][name] = value
+
+    @staticmethod
+    def get_cookies_for(host):
+        if host not in Request.cookies:
+            return None
+        return Request.cookies[host]
+
+    @staticmethod
+    def get_host_from_url(url):
+        url = url.split("://")[1]
+        return url.split("/")[0]
