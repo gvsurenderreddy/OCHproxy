@@ -23,13 +23,13 @@ class Hoster:
         with plugin_source:
             for p in plugin_source.list_plugins():
                 h = plugin_source.load_plugin(p)
-                if h.match is None or h.handle is None or h.priority is None:
+                if not hasattr(h, "match") or not hasattr(h, "handle") or not hasattr(h, "priority"):
                     continue
                 self.hoster.append((p, h))
-                if h.setup is not None:
+                if hasattr(h, "setup"):
                     print "Setting up hoster", p
                     h.setup()
-                if h.needs is None:
+                if not hasattr(h, "needs"):
                     continue
                 for n in h.needs():
                     if not Config.get(n):
