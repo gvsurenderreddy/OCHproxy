@@ -1,4 +1,7 @@
 import json
+import os
+
+CONFIG_PATH = 'config.json'
 
 
 class Config:
@@ -6,6 +9,8 @@ class Config:
         pass
 
     __author__ = 'bauerj'
+    config = None
+    config_changed = 0
 
     @staticmethod
     def set(key, value):
@@ -23,14 +28,17 @@ class Config:
     @staticmethod
     def get_all():
         try:
-            with open('config.json') as config_file:
-                return json.load(config_file)
+            if Config.config is None or Config.config_changed is not os.stat(CONFIG_PATH)[8]:
+                with open(CONFIG_PATH) as config_file:
+                    Config.config = json.load(config_file)
+                    Config.config_changed = os.stat(CONFIG_PATH)[8]
+            return Config.config
         except (ValueError, IOError):
             return {}
 
     @staticmethod
     def save(c):
-        with open('config.json', 'w') as config_file:
+        with open(CONFIG_PATH, 'w') as config_file:
             json.dump(c, config_file, indent=4)
 
     @staticmethod
