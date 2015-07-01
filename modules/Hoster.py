@@ -26,6 +26,9 @@ class Hoster:
                 if h.match is None or h.handle is None or h.priority is None:
                     continue
                 self.hoster.append((p, h))
+                if h.setup is not None:
+                    print "Setting up hoster", p
+                    h.setup()
                 if h.needs is None:
                     continue
                 for n in h.needs():
