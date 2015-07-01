@@ -1,6 +1,7 @@
 import SocketServer
 import SimpleHTTPServer
 import urlparse
+import auth
 from modules.Config import Config
 from modules.Hoster import Hoster
 
@@ -12,17 +13,20 @@ class Server:
         global hoster
         hoster = Hoster()
         port = Config.get("http/port", 81)
-        httpd = SocketServer.ThreadingTCPServer(('', port), self.Proxy)
-        print "Starting HTTP server on port", port, "..."
+        ip = Config.get("http/ip", "0.0.0.0")
+        httpd = SocketServer.ThreadingTCPServer((ip, port), self.Proxy)
+        print "Starting HTTP server on ", ip, "port",  port, "..."
         httpd.serve_forever()
 
     class Proxy(SimpleHTTPServer.SimpleHTTPRequestHandler):
         global hoster
 
         def do_GET(self):
-            if not self.require_params(["link", "user", "password"]):
+            if not self.require_params(["link"]):
                 return
-
+            if not auth.auth(self.parse_params(), self.client_address):
+                self.send_error(403)
+                return
             link = self.parse_params()["link"]
             handle = hoster.handle_link(link[0])
             if handle is None:
