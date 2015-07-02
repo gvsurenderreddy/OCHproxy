@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/bauerj/OCHproxy.svg)](https://travis-ci.org/bauerj/OCHproxy)
 # OCHproxy
 OCHproxy is an API that eases downloading from one-click hosters.
 Using OCHproxy, you can share premium-accounts for one-click hosters with other people and get the following benefits:
