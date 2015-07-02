@@ -9,7 +9,7 @@ def test_none():
         Config.get(None)
 
 def test_unset():
-    assert Config.get("http/port") is None
+    assert Config.get("q/q") is None
 
 def test_path():
     json = '{"test": {"path": true}}'
