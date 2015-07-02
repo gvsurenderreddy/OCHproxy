@@ -26,10 +26,10 @@ def test_set():
 
 def test_save():
     with open("config.json", "r") as f:
-        x = hashlib.sha1(f.read())
+        x = hashlib.sha1(f.read().encode('utf-8'))
     Config.set("foo/var", "raw")
     with open("config.json", "r") as f:
-        y = hashlib.sha1(f.read())
+        y = hashlib.sha1(f.read().encode('utf-8'))
     assert x != y
 
 def teardown_module(module):
