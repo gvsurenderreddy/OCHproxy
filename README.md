@@ -23,3 +23,10 @@ You need to add your usernames and passwords there if you want to use a hoster.
 
 ## Supported hosters
 Look in the `hoster` directory for a list of supported hosters.
+
+## Run the tests
+To run the tests, you need to install py.test:
+
+    pip install py.test
+    
+Then you can just run `py.test` and see if the tests are running as they are supposed to.

@@ -16,9 +16,7 @@ class Config:
 
     @staticmethod
     def set(key, value):
-        (key, c) = Config.traverse(key)
-        c[key] = value
-        Config.save(c)
+        Config.traverse(key, set_to=value)
 
     @staticmethod
     def get(key, default=None):
@@ -45,7 +43,7 @@ class Config:
             json.dump(c, config_file, indent=4)
 
     @staticmethod
-    def traverse(key, default=None):
+    def traverse(key, default=None, set_to=None):
         full = c = Config.get_all()
         changed = False
         while "/" in key:
@@ -57,6 +55,9 @@ class Config:
             key = "/".join(key.split("/")[1:])
         if key not in c:
             c[key] = default
+            changed = True
+        if set_to is not None:
+            c[key] = set_to
             changed = True
         if changed:
             Config.save(full)
