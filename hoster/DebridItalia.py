@@ -44,7 +44,7 @@ supported = [
 
 
 def needs():
-    return ["hoster/DebridItalia/password", "hoster/DebridItalia/user"]
+    return ["password", "user"]
 
 
 def priority():
@@ -65,8 +65,8 @@ def handle(link):
     r = Request.Request("http://www.debriditalia.com/api.php", payload={
         'generate': "on",
         'link': link,
-        'p': Config.get("hoster/debriditalia/password"),
-        'u': Config.get("hoster/debriditalia/user")}).send()
+        'p': Config.get("password"),
+        'u': Config.get("user")}).send()
     if "ERROR:" not in r.text:
         return Request.Request(url=r.text.strip())
     return None

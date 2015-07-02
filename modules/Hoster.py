@@ -3,9 +3,9 @@ from modules.Config import Config
 
 
 def configured(hoster):
-    need = hoster.needs()
+    need = hoster[1].needs()
     for n in need:
-        if not Config.get(n):
+        if not Config.get("hoster/" + hoster[0] + "/" + n):
             return False
     return True
 
@@ -25,6 +25,7 @@ class Hoster:
                 h = plugin_source.load_plugin(p)
                 if not hasattr(h, "match") or not hasattr(h, "handle") or not hasattr(h, "priority"):
                     continue
+                Config.get("hoster/" + p + "/active", False)
                 self.hoster.append((p, h))
                 if hasattr(h, "setup"):
                     print "Setting up hoster", p
@@ -32,15 +33,14 @@ class Hoster:
                 if not hasattr(h, "needs"):
                     continue
                 for n in h.needs():
-                    if not Config.get(n):
-                        n = n.split("/")[-1]
+                    if not Config.get("hoster/" + p + "/" + n):
                         print "Hoster", p, \
                             "needs a", n + ". You need to add a", n, "for", p, "to config.json " \
                                                                                "to use the plugin (no restart needed)."
 
     def handle_link(self, link):
         okay = [h[1] for h in self.hoster if
-                h.match(link) and configured(h) and Config.get("hoster/" + h[0] + "/active", False)]
+                h[1].match(link) and configured(h) and Config.get("hoster/" + h[0] + "/active", False)]
         if len(okay) < 1:
             print "Can't handle link", link, "because no hoster wants to do it"
             return None

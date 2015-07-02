@@ -7,7 +7,7 @@ dls = 0
 
 
 def needs():
-    return ["hoster/ShareOnline/user", "hoster/ShareOnline/password"]
+    return ["user", "password"]
 
 
 def priority():
@@ -26,8 +26,8 @@ def handle(link):
     r = Request.Request(url="http://api.share-online.biz/account.php",
                         payload={
                             'act': "download",
-                            'username': Config.get("hoster/share-online/user"),
-                            'password': Config.get("hoster/share-online/password"),
+                            'username': Config.get("user"),
+                            'password': Config.get("password"),
                             'lid': lid}).send()
     if r.status_code == 404:
         return Request.Request(url=link)

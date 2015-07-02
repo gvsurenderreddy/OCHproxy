@@ -15,13 +15,21 @@ class Server:
         port = Config.get("http/port", 81)
         ip = Config.get("http/ip", "0.0.0.0")
         httpd = SocketServer.ThreadingTCPServer((ip, port), self.Proxy)
-        print "Starting HTTP server on ", ip, "port",  port, "..."
+        print "Starting HTTP server on ", ip, "port", port, "..."
         httpd.serve_forever()
 
     class Proxy(SimpleHTTPServer.SimpleHTTPRequestHandler):
         global hoster
 
         def do_GET(self):
+            try:
+                action = "serve_" + (self.path.split("?")[0].strip("/") or "index")
+                if hasattr(self, action):
+                    getattr(self, action)()
+            except TypeError:
+                self.serve_index()
+
+        def serve_get(self):
             if not self.require_params(["link"]):
                 return
             if not auth.auth(self.parse_params(), self.client_address):
@@ -40,8 +48,18 @@ class Server:
             self.end_headers()
             self.copyfile(handle, self.wfile)
 
+        def serve_index(self):
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.end_headers()
+            with open("static/index.html") as f:
+                self.copyfile(f, self.wfile)
+
         def parse_params(self):
-            return urlparse.parse_qs(self.path.strip("/?"))
+            try:
+                return urlparse.parse_qs(self.path.split("?", 1)[1])
+            except IndexError:
+                return {}
 
         def require_params(self, params):
             errors = []
