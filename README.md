@@ -16,7 +16,7 @@ Currently, this is the best way to install OCHproxy:
 
 1. Clone the Git repository.
 2. Install python2.
-3. Use `python2 setup.py` to install dependencies.
+3. Use `python2 setup.py install` to install dependencies.
 
 ## Usage
 Use `python2 ochload.py` to start the server. After the first run, a file named `config.json` is generated.
