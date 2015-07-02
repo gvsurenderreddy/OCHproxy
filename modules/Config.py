@@ -1,5 +1,7 @@
+import inspect
 import json
 import os
+import re
 
 CONFIG_PATH = 'config.json'
 
@@ -20,6 +22,7 @@ class Config:
 
     @staticmethod
     def get(key, default=None):
+        key = Config.qualify(key)
         (key, c) = Config.traverse(key, default)
         if key in c:
             return c[key]
@@ -58,3 +61,15 @@ class Config:
         if changed:
             Config.save(full)
         return key, c
+
+    @staticmethod
+    def qualify(key):
+        if "/" in key:
+            return key
+        try:
+            stack = inspect.stack(0)
+            caller_file = stack[2][1].rstrip(".py")
+            qualifier = re.findall("\w+", caller_file)
+            return "/".join(qualifier) + "/" + key
+        except KeyError:
+            return key
