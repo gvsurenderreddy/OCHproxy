@@ -1,7 +1,7 @@
 import SocketServer
 import SimpleHTTPServer
 import urlparse
-import auth
+from modules.Auth import Auth
 from modules.Config import Config
 from modules.Hoster import Hoster
 
@@ -38,8 +38,8 @@ class Server:
         def serve_get(self):
             if not self.require_params(["link"]):
                 return
-            if not auth.auth(self.parse_params(), self.client_address):
-                self.send_error(403)
+            if not Auth.auth(self.parse_params(), self.client_address):
+                self.send_error(401)
                 return
             link = self.parse_params()["link"]
             handle = hoster.handle_link(link[0])
