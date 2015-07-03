@@ -6,9 +6,11 @@ from modules.Config import Config
 __author__ = 'bauerj'
 
 
-def get_user_agent():
-    return Config.get("http/user-agent", "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) "
-                                         "Chrome/41.0.2228.0 Safari/537.36")
+def get_default_headers():
+    return {"User-Agent":
+            Config.get("http/user-agent",
+                       "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) "
+                       "Chrome/41.0.2228.0 Safari/537.36")}
 
 
 class Request:
@@ -40,8 +42,10 @@ class Request:
     def open(self):
         opener = urllib2.build_opener()
         host = Request.get_host_from_url(self.url)
-        user_agent = get_user_agent()
-        opener.addheaders = [("User-Agent", user_agent)]
+        headers = get_default_headers()
+        opener.addheaders = []
+        for (k, v) in headers.iteritems():
+            opener.addheaders.append((k, v))
         opener.addheaders.append(
             ('Cookie', "; ".join('%s=%s' % (k, v) for k, v in Request.get_cookies_for(host).items())))
         if self.get_method() == "GET":
@@ -62,11 +66,12 @@ class Request:
 
     def send(self):
         host = Request.get_host_from_url(self.url)
+        headers = get_default_headers()
         if self.method != "POST":
-            r = requests.get(self.url, params=self.payload, headers={"User-Agent": get_user_agent()},
+            r = requests.get(self.url, params=self.payload, headers=headers,
                              cookies=Request.get_cookies_for(host))
         else:
-            r = requests.post(self.url, data=self.payload, headers={"User-Agent": get_user_agent()},
+            r = requests.post(self.url, data=self.payload, headers=headers,
                               cookies=Request.get_cookies_for(host))
         for n, v in r.cookies.iteritems():
             Request.set_cookie_for(host, n, v)
@@ -81,7 +86,7 @@ class Request:
     @staticmethod
     def get_cookies_for(host):
         if host not in Request.cookies:
-            return None
+            return {}
         return Request.cookies[host]
 
     @staticmethod
