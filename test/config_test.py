@@ -1,36 +1,39 @@
 import hashlib
 import os
+import tempfile
 import pytest
-from modules.Config import Config
+from modules import Config
 
+def setup_module(module):
+    Config.CONFIG_PATH = tempfile.gettempdir() + "/ochproxy_test.json"
 
 def test_none():
     with pytest.raises(TypeError):
-        Config.get(None)
+        Config.Config.get(None)
 
 def test_unset():
-    assert Config.get("q/q") is None
+    assert Config.Config.get("q/q") is None
 
 def test_path():
     json = '{"test": {"path": true}}'
-    with open("config.json", "w") as f:
+    with open(Config.CONFIG_PATH, "w") as f:
         f.write(json)
-    assert Config.get("test/path") is True
+    assert Config.Config.get("test/path") is True
 
 def test_getall():
-    Config.get_all()
+    Config.Config.get_all()
 
 def test_set():
-    Config.set("q/w/e", True)
-    assert Config.get("q/w/e") is True
+    Config.Config.set("q/w/e", True)
+    assert Config.Config.get("q/w/e") is True
 
 def test_save():
-    with open("config.json", "r") as f:
+    with open(Config.CONFIG_PATH, "r") as f:
         x = hashlib.sha1(f.read().encode('utf-8'))
-    Config.set("foo/var", "raw")
-    with open("config.json", "r") as f:
+    Config.Config.set("foo/var", "raw")
+    with open(Config.CONFIG_PATH, "r") as f:
         y = hashlib.sha1(f.read().encode('utf-8'))
     assert x != y
 
 def teardown_module(module):
-    os.remove("config.json")
+    os.remove(Config.CONFIG_PATH)

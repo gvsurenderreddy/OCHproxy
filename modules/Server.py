@@ -7,16 +7,19 @@ from modules.Hoster import Hoster
 
 
 class Server:
+    httpd = None
     hoster = None
+    test = False
 
-    def __init__(self):
+    def __init__(self, test=False):
         global hoster
+        Server.test = test
         hoster = Hoster()
         port = Config.get("http/port", 81)
         ip = Config.get("http/ip", "0.0.0.0")
-        httpd = SocketServer.ThreadingTCPServer((ip, port), self.Proxy)
+        Server.httpd = SocketServer.ThreadingTCPServer((ip, port), self.Proxy)
         print "Starting HTTP server on ", ip, "port", port, "..."
-        httpd.serve_forever()
+        Server.httpd.serve_forever()
 
     class Proxy(SimpleHTTPServer.SimpleHTTPRequestHandler):
         global hoster
@@ -28,6 +31,9 @@ class Server:
                     getattr(self, action)()
             except TypeError:
                 self.serve_index()
+            # If the test suite started this, we need to stop the server
+            if Server.test:
+                Server.httpd.shutdown()
 
         def serve_get(self):
             if not self.require_params(["link"]):

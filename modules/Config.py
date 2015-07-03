@@ -4,7 +4,7 @@ import os
 import re
 import shutil
 
-CONFIG_PATH = 'config.json'
+CONFIG_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", 'config.json'))
 
 
 class Config:
@@ -39,7 +39,7 @@ class Config:
             print "ATTENTION: config.json did not contain valid json. The config file will be recreated"
             print "A backup of the current file can be found in config.json.invalid"
             shutil.copyfile(CONFIG_PATH, CONFIG_PATH + ".invalid")
-        except IOError:
+        except (IOError, WindowsError):
             pass
         return {}
 
