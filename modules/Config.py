@@ -2,6 +2,7 @@ import inspect
 import json
 import os
 import re
+import shutil
 
 CONFIG_PATH = 'config.json'
 
@@ -34,8 +35,13 @@ class Config:
                     Config.config = json.load(config_file)
                     Config.config_changed = os.stat(CONFIG_PATH)[8]
             return Config.config
-        except (ValueError, IOError):
-            return {}
+        except ValueError:
+            print "ATTENTION: config.json did not contain valid json. The config file will be recreated"
+            print "A backup of the current file can be found in config.json.invalid"
+            shutil.copyfile(CONFIG_PATH, CONFIG_PATH + ".invalid")
+        except IOError:
+            pass
+        return {}
 
     @staticmethod
     def save(c):
