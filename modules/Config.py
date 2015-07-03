@@ -39,7 +39,7 @@ class Config:
             print "ATTENTION: config.json did not contain valid json. The config file will be recreated"
             print "A backup of the current file can be found in config.json.invalid"
             shutil.copyfile(CONFIG_PATH, CONFIG_PATH + ".invalid")
-        except (IOError, WindowsError):
+        except (IOError, OSError):
             pass
         return {}
 

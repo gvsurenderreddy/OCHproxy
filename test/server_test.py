@@ -9,7 +9,7 @@ from modules.Server import Server
 def test_server():
     thread = threading.Thread(target=run, args=())
     thread.start()
-    time.sleep(1)
+    time.sleep(4)
     r = requests.get("http://localhost:81/")
     assert r.status_code == 200
     assert len(r.text) > 1
