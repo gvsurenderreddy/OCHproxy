@@ -11,11 +11,11 @@ class Server:
     hoster = None
     test = False
 
-    def __init__(self, test=False):
+    def __init__(self, test=False, port=None):
         global hoster
         Server.test = test
         hoster = Hoster()
-        port = Config.get("http/port", 81)
+        port = port or Config.get("http/port", 8080)
         ip = Config.get("http/ip", "0.0.0.0")
         Server.httpd = SocketServer.ThreadingTCPServer((ip, port), self.Proxy)
         print "Starting HTTP server on ", ip, "port", port, "..."

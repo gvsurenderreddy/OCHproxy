@@ -10,10 +10,10 @@ def test_server():
     thread = threading.Thread(target=run, args=())
     thread.start()
     time.sleep(4)
-    r = requests.get("http://localhost:81/")
+    r = requests.get("http://localhost:8182/")
     assert r.status_code == 200
     assert len(r.text) > 1
 
 
 def run():
-    Server(test=True)
+    Server(test=True, port=8182)
