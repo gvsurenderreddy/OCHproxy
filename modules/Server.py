@@ -47,6 +47,11 @@ class Server:
                 self.send_error(500, "The server was unable to process your request")
                 return
             self.send_response(200)
+            for h in self.headers.headers:
+                h = h.split(":", maxsplit=1)
+                if "Range" in h[0]:
+                    handle.add_header(h[0], h[1])
+            handle = handle.open()
             if hasattr(handle.info(), "headers"):
                 headers = handle.info().headers
                 for h in headers:

@@ -15,6 +15,7 @@ def get_default_headers():
 
 class Request:
     cookies = {}
+    headers = {}
 
     def __init__(self, url=None, payload=None, method="GET"):
         self.method = method
@@ -24,6 +25,9 @@ class Request:
     def set_method(self, method):
         self.method = method
         return self
+
+    def add_header(self, header, value):
+        self.headers[header] = value
 
     def get_method(self):
         return self.method
@@ -44,15 +48,12 @@ class Request:
         host = Request.get_host_from_url(self.url)
         headers = get_default_headers()
         opener.addheaders = []
-        for (k, v) in headers.iteritems():
+        for (k, v) in headers.update(self.headers).iteritems():
             opener.addheaders.append((k, v))
         opener.addheaders.append(
             ('Cookie', "; ".join('%s=%s' % (k, v) for k, v in Request.get_cookies_for(host).items())))
         if self.get_method() == "GET":
-            url = self.url
-            if len(self.payload) > 0:
-                url = url + "?" + urllib.urlencode(self.payload)
-            r = opener.open(url)
+            r = opener.open(self.get_parametrized_url())
         else:
             r = opener.open(self.url, data=self.payload)
         try:
@@ -93,3 +94,9 @@ class Request:
     def get_host_from_url(url):
         url = url.split("://")[1]
         return url.split("/")[0]
+
+    def get_parametrized_url(self):
+        url = self.url
+        if len(self.payload) > 0:
+            url = url + "?" + urllib.urlencode(self.payload)
+        return url

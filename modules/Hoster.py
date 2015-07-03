@@ -1,4 +1,5 @@
 from pluginbase import PluginBase
+import time
 from modules.Config import Config
 
 
@@ -14,6 +15,7 @@ class Hoster:
     hoster = []
     plugin_source = None
     downloads = {}
+    handled = {}
 
     def __init__(self):
         global plugin_source
@@ -39,6 +41,10 @@ class Hoster:
                                                                                "to use the plugin (no restart needed)."
 
     def handle_link(self, link):
+        if link in Hoster.handled:
+            t, result = Hoster.handled[link]
+            if (t+30*60) > time.time():
+                return result
         okay = [h[1] for h in self.hoster if
                 h[1].match(link) and configured(h) and Config.get("hoster/" + h[0] + "/active", False)]
         if len(okay) < 1:
@@ -48,13 +54,13 @@ class Hoster:
         for hoster in okay:
             priorized.append((hoster.priority() * self.get_downloads_for(hoster), hoster))
         priorized = sorted(priorized, key=lambda x: x[0])
-        # reload(priorized[0][1])
         download = priorized[0][1].handle(link)
         if download is None:
             print priorized[0][1], "wasn't able to process", link
             return None
         self.increase_downloads_for(priorized[0][1])
-        return download.open()
+        Hoster.handled[link] = (time.time(), download)
+        return download
 
     def get_downloads_for(self, hoster):
         if hoster not in self.downloads:
