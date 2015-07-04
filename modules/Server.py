@@ -3,8 +3,8 @@ import SimpleHTTPServer
 import logging
 import socket
 import urlparse
-from modules.Auth import Auth
 from modules.Config import Config
+from modules.Decorators import needs_auth
 from modules.Hoster import Hoster
 from shove import Shove
 
@@ -50,14 +50,10 @@ class Server:
                 Server.httpd.shutdown()
             Server.traffic.sync()
 
-        def serve_get(self):
+        @needs_auth
+        def serve_get(self, user=None):
             if not self.require_params(["link"]):
                 self.print_debug("Request didn't contain a link to download")
-                return
-            user = Auth.auth(self.parse_params(), self.client_address)
-            if user is None:
-                self.print_debug("Request could not be authenticated")
-                self.send_error(401)
                 return
             link = self.parse_params()["link"]
             plugin, handle = hoster.handle_link(link[0])
@@ -70,6 +66,12 @@ class Server:
                 self.send_error(421)
                 return
             user.connections += 1
+            content_length = self.send_handle_to_user(handle)
+            user.connections -= 1
+            Server.add_traffic_for("user", user.username, content_length)
+            Server.add_traffic_for("hoster", plugin, content_length)
+
+        def send_handle_to_user(self, handle):
             self.send_response(200)
             for h in self.headers.headers:
                 h = h.split(":", 1)
@@ -80,7 +82,6 @@ class Server:
             try:
                 handle = handle.open()
             except socket.timeout:
-                user.connections -= 1
                 self.print_debug("Upstream timeout")
                 self.send_error(500, "Upstream timeout")
                 return
@@ -96,9 +97,7 @@ class Server:
             self.print_debug("Copying file to client")
             self.copyfile(handle, self.wfile)
             self.print_debug("Finished")
-            user.connections -= 1
-            Server.add_traffic_for("user", user.username, cl)
-            Server.add_traffic_for("hoster", plugin, cl)
+            return cl
 
         def serve_index(self):
             self.send_response(200)

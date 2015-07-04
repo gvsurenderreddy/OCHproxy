@@ -53,11 +53,14 @@ def priority():
 
 def match(link):
     # TODO
-    hoster = link.split("://")[1]
-    hoster = hoster.split("/")[0]
-    hoster = hoster.strip("www.")
-    if str.upper(hoster) in map(str.upper, supported):
-        return handle(link) is not None
+    try:
+        hoster = link.split("://")[1]
+        hoster = hoster.split("/")[0]
+        hoster = hoster.strip("www.")
+        if str.upper(hoster) in map(str.upper, supported):
+            return handle(link) is not None
+    except IndexError:
+        return False
     return False
 
 
