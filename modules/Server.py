@@ -6,15 +6,18 @@ import urlparse
 from modules.Auth import Auth
 from modules.Config import Config
 from modules.Hoster import Hoster
+from shove import Shove
 
 
 class Server:
     httpd = None
     hoster = None
     test = False
+    traffic = None
 
     def __init__(self, test=False, port=None):
         global hoster
+        Server.traffic = Shove('file://traffic_log/')
         Server.test = test
         hoster = Hoster()
         port = port or Config.get("http/port", 8080)
@@ -22,6 +25,13 @@ class Server:
         Server.httpd = SocketServer.ThreadingTCPServer((ip, port), self.Proxy)
         logging.info("Starting HTTP server on " + ip + " port " + str(port) + "...")
         Server.httpd.serve_forever()
+
+    @staticmethod
+    def add_traffic_for(type, name, bytes):
+        if type + "/" + name not in Server.traffic:
+            Server.traffic[type + "/" + name] = bytes
+        else:
+            Server.traffic[type + "/" + name] += bytes
 
     class Proxy(SimpleHTTPServer.SimpleHTTPRequestHandler):
         global hoster
@@ -38,6 +48,7 @@ class Server:
             # If the test suite started this, we need to stop the server
             if Server.test:
                 Server.httpd.shutdown()
+            Server.traffic.sync()
 
         def serve_get(self):
             if not self.require_params(["link"]):
@@ -49,7 +60,7 @@ class Server:
                 self.send_error(401)
                 return
             link = self.parse_params()["link"]
-            handle = hoster.handle_link(link[0])
+            plugin, handle = hoster.handle_link(link[0])
             if handle is None:
                 self.send_error(500, "The server was unable to process your request")
                 self.print_debug("Link handler returned None")
@@ -74,17 +85,20 @@ class Server:
                 self.send_error(500, "Upstream timeout")
                 return
             self.print_debug("Connection established, forwarding headers to client...")
+            cl = 0
             if hasattr(handle.info(), "headers"):
                 headers = handle.info().headers
                 for h in headers:
                     self.send_header(h.split(": ")[0], h.split(": ")[1].strip())
-                    if "Content-Length" in h:
-                        self.print_debug("Remote response: " + h)
+                    if "Content-Length:" in h:
+                        cl = int(h.split(":", 1)[1].strip())
             self.end_headers()
             self.print_debug("Copying file to client")
             self.copyfile(handle, self.wfile)
             self.print_debug("Finished")
             user.connections -= 1
+            Server.add_traffic_for("user", user.username, cl)
+            Server.add_traffic_for("hoster", plugin, cl)
 
         def serve_index(self):
             self.send_response(200)

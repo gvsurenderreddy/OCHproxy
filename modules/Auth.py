@@ -2,16 +2,17 @@
 class Auth:
     class User:
 
-        def __init__(self, password):
+        def __init__(self, username, password):
             self.password = password
             self.connections = 0
+            self.username = username
 
     user = {}
     try:
         with open('users.txt') as f:
             for x in f.readlines():
                 u, p = x.strip().split(":", 1)
-                user[u] = User(p)
+                user[u] = User(p, u)
     except (IOError, OSError):
         pass
 
