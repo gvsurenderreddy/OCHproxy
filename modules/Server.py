@@ -1,6 +1,7 @@
 import SocketServer
 import SimpleHTTPServer
 import logging
+import socket
 import urlparse
 from modules.Auth import Auth
 from modules.Config import Config
@@ -42,7 +43,8 @@ class Server:
             if not self.require_params(["link"]):
                 self.print_debug("Request didn't contain a link to download")
                 return
-            if not Auth.auth(self.parse_params(), self.client_address):
+            user = Auth.auth(self.parse_params(), self.client_address)
+            if user is None:
                 self.print_debug("Request could not be authenticated")
                 self.send_error(401)
                 return
@@ -52,6 +54,11 @@ class Server:
                 self.send_error(500, "The server was unable to process your request")
                 self.print_debug("Link handler returned None")
                 return
+            if user.connections >= Config.get("app/max_connections_per_user", 20):
+                self.print_debug("User has already " + user.connections + " connections open, can't open more.")
+                self.send_error(421)
+                return
+            user.connections += 1
             self.send_response(200)
             for h in self.headers.headers:
                 h = h.split(":", 1)
@@ -59,7 +66,13 @@ class Server:
                     self.print_debug("Forwarding range header " + h[0] + ":" + h[1])
                     handle.add_header(h[0], h[1])
             self.print_debug("Opening connection to " + handle.get_url())
-            handle = handle.open()
+            try:
+                handle = handle.open()
+            except socket.timeout:
+                user.connections -= 1
+                self.print_debug("Upstream timeout")
+                self.send_error(500, "Upstream timeout")
+                return
             self.print_debug("Connection established, forwarding headers to client...")
             if hasattr(handle.info(), "headers"):
                 headers = handle.info().headers
@@ -71,6 +84,7 @@ class Server:
             self.print_debug("Copying file to client")
             self.copyfile(handle, self.wfile)
             self.print_debug("Finished")
+            user.connections -= 1
 
         def serve_index(self):
             self.send_response(200)
