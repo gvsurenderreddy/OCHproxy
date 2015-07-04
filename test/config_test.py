@@ -28,12 +28,14 @@ def test_set():
     assert Config.Config.get("q/w/e") is True
 
 def test_save():
-    with open(Config.CONFIG_PATH, "r") as f:
-        x = hashlib.sha1(f.read().encode('utf-8'))
+    x = get_config_hash()
     Config.Config.set("foo/var", "raw")
-    with open(Config.CONFIG_PATH, "r") as f:
-        y = hashlib.sha1(f.read().encode('utf-8'))
+    y = get_config_hash()
     assert x != y
+
+def get_config_hash():
+    with open(Config.CONFIG_PATH, "r") as f:
+        return hashlib.sha1(f.read().encode('utf-8'))
 
 def teardown_module(module):
     os.remove(Config.CONFIG_PATH)
