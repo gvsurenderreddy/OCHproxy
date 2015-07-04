@@ -36,6 +36,9 @@ class Request:
         self.url = url
         return self
 
+    def get_url(self):
+        return self.url or ""
+
     def set_payload(self, payload):
         self.payload = payload
         return self

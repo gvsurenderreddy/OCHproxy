@@ -1,6 +1,7 @@
 # Config file
 config.json
 users.txt
+ochload.log
 
 # Python bytecode
 *.pyc
