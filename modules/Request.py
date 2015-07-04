@@ -71,12 +71,12 @@ class Request:
     def send(self):
         host = Request.get_host_from_url(self.url)
         headers = get_default_headers()
-        if self.method != "POST":
-            r = requests.get(self.url, params=self.payload, headers=headers,
-                             cookies=Request.get_cookies_for(host))
-        else:
-            r = requests.post(self.url, data=self.payload, headers=headers,
-                              cookies=Request.get_cookies_for(host))
+        if not hasattr(requests, self.method.lower()):
+            raise Exception("Method should be either POST or GET")
+        m = getattr(requests, self.method.lower())
+        args = {"headers": headers, "cookies": Request.get_cookies_for(host),
+                "params" if self.method.lower() == "get" else "payload": self.payload}
+        r = m(self.url, **args)
         for n, v in r.cookies.iteritems():
             Request.set_cookie_for(host, n, v)
         return r
