@@ -48,7 +48,7 @@ class Request:
         host = Request.get_host_from_url(self.url)
         headers = get_default_headers()
         opener.addheaders = []
-        for (k, v) in headers.update(self.headers).iteritems():
+        for (k, v) in dict(headers, **self.headers).iteritems():
             opener.addheaders.append((k, v))
         opener.addheaders.append(
             ('Cookie', "; ".join('%s=%s' % (k, v) for k, v in Request.get_cookies_for(host).items())))

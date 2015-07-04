@@ -34,6 +34,6 @@ def handle(link):
     lines = r.text.splitlines()
     for line in lines:
         if "URL" in line:
-            url = line.split(":", maxsplit=1)[1].strip()
+            url = line.split(":", 1)[1].strip()
             return Request.Request(url=url)
     return Request.Request(url=link)

@@ -25,12 +25,10 @@ class Server:
         global hoster
 
         def do_GET(self):
-            try:
-                action = "serve_" + (self.path.split("?")[0].strip("/") or "index")
-                if hasattr(self, action):
-                    getattr(self, action)()
-            except TypeError:
-                self.serve_index()
+            action = "serve_" + (self.path.split("?")[0].strip("/") or "index")
+            if hasattr(self, action) and hasattr(getattr(self, action), "__call__"):
+                getattr(self, action)()
+
             # If the test suite started this, we need to stop the server
             if Server.test:
                 Server.httpd.shutdown()
@@ -48,7 +46,7 @@ class Server:
                 return
             self.send_response(200)
             for h in self.headers.headers:
-                h = h.split(":", maxsplit=1)
+                h = h.split(":", 1)
                 if "Range" in h[0]:
                     handle.add_header(h[0], h[1])
             handle = handle.open()
