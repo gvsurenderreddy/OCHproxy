@@ -124,3 +124,14 @@ class Server:
                 self.send_error(400, 'Missing required GET parameters ' + ', '.join(errors))
                 return False
             return True
+
+        def send_response(self, code, message=None):
+            self.log_request(code)
+            if message is None:
+                if code in self.responses:
+                    message = self.responses[code][0]
+                else:
+                    message = ''
+                if self.request_version != 'HTTP/0.9':
+                    self.wfile.write("%s %d %s\r\n" %
+                                     (self.protocol_version, code, message))
