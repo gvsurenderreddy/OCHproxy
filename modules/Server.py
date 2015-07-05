@@ -56,13 +56,16 @@ class Server:
                 self.print_debug("Request didn't contain a link to download")
                 return
             link = self.parse_params()["link"]
-            plugin, handle = hoster.handle_link(link[0])
+            try:
+                plugin, handle = hoster.handle_link(link[0])
+            except TypeError:
+                plugin = handle = None
             if handle is None:
                 self.send_error(500, "The server was unable to process your request")
                 self.print_debug("Link handler returned None")
                 return
             if user.connections >= Config.get("app/max_connections_per_user", 20):
-                self.print_debug("User has already " + user.connections + " connections open, can't open more.")
+                self.print_debug("User has already " + str(user.connections) + " connections open, can't open more.")
                 self.send_error(421)
                 return
             user.connections += 1
