@@ -3,6 +3,7 @@ import SimpleHTTPServer
 import logging
 import socket
 import urlparse
+import time
 from modules.Config import Config
 from modules.Decorators import needs_auth
 from modules.Hoster import Hoster
@@ -69,10 +70,12 @@ class Server:
                 self.send_error(421)
                 return
             user.connections += 1
+            start_time = time.time()
             content_length = self.send_handle_to_user(handle)
             user.connections -= 1
-            Server.add_traffic_for("user", user.username, content_length)
-            Server.add_traffic_for("hoster", plugin, content_length)
+            download_details = (content_length, time.time() - start_time)
+            Server.add_traffic_for("user", user.username, download_details)
+            Server.add_traffic_for("hoster", plugin, download_details)
 
         def send_handle_to_user(self, handle):
             self.send_response(200)

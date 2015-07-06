@@ -1,3 +1,5 @@
+humanize
+texttable
 shove
 requests
 pluginbase
