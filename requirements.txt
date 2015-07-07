@@ -2,6 +2,5 @@ pyquery
 humanize
 texttable
 shove
-requests
 pluginbase
 requests[security]
