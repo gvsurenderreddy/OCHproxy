@@ -28,9 +28,10 @@ class Hoster:
                 h.plugin_name = p
                 if not hasattr(h, "match") or not hasattr(h, "handle") or not hasattr(h, "priority"):
                     continue
-                Config.get("hoster/" + p + "/active", False)
+                if not Config.get("hoster/" + p + "/active", False):
+                    continue
                 self.hoster.append(h)
-                if hasattr(h, "setup"):
+                if hasattr(h, "setup") and configured(h):
                     print "Setting up hoster", p
                     h.setup()
                 if not hasattr(h, "needs"):

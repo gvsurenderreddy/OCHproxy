@@ -1,9 +1,22 @@
+import base64
+import logging
 import re
-from modules import Request
+from modules.Request import Request
 from modules.Config import Config
+from pyquery import PyQuery
 
 link_format = r"https?://(www\.)?share-online.biz/dl/(.*)$"
 dls = 0
+autoload_enabled = None
+
+
+def setup():
+    # Login
+    r = Request("https://www.share-online.biz/user/login", method="POST", payload={
+        "user": Config.get("user"),
+        "pass": Config.get("password"),
+        "l_rememberme": 1
+    }).add_header("referer", "https://www.share-online.biz/").send()
 
 
 def needs():
@@ -19,21 +32,27 @@ def match(link):
 
 
 def handle(link):
+    r = Request(link)
+    global autoload_enabled
+    if autoload_enabled is True:
+        return r
+    # We just need to check the headers to find out if Direct Download is enabled. If it is, close the connection and
+    # don't load the file. That way, this check won't be as suspicious.
+    h = r.open()
+    if autoload_enabled is None:
+        if "/dl?" in h.url:
+            autoload_enabled = True
+            h.close()
+            logging.debug("Direct Download for Share-Online.biz is enabled")
+            return r
+    logging.debug("autoload for Share-Online.biz is not enabled")
+    response = PyQuery(h.read())
+    link = response("#download script").text()
+    if link is None:
+        raise Exception("invalid download link (ShareOnline)")
     try:
-        lid = re.match(link_format, link).group(2)
+        link = re.search("var dl.?=.?\"(.*?)\"", link).group(1)
+        link = base64.b64decode(link)
     except IndexError:
-        return Request.Request(url=link)
-    r = Request.Request(url="http://api.share-online.biz/account.php",
-                        payload={
-                            'act': "download",
-                            'username': Config.get("user"),
-                            'password': Config.get("password"),
-                            'lid': lid}).send()
-    if r.status_code == 404:
-        return Request.Request(url=link)
-    lines = r.text.splitlines()
-    for line in lines:
-        if "URL" in line:
-            url = line.split(":", 1)[1].strip()
-            return Request.Request(url=url)
-    return Request.Request(url=link)
+        raise Exception("Could not extract download link. Please consider enabling Direct Download")
+    return Request(link)
