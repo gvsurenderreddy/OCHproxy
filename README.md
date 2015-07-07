@@ -19,6 +19,17 @@ Currently, this is the best way to install OCHproxy:
 2. Install python2.
 3. Use `pip install -r requirements.txt` to install dependencies.
 
+
+## FAQ
+*While installing the dependencies on Linux, I get a message like this:*
+
+    src/lxml/lxml.etree.c:16:20: fatal error: Python.h: Not found
+    
+You need to install the header files for Python, libXML2 and libXSLT so that pip can compile `pyquery`.
+
+    apt-get install libxml2-dev libxslt1-dev python-dev
+    
+
 ## Usage
 Use `python2 ochload.py` to start the server. After the first run, a file named `config.json` is generated.
 You need to add your usernames and passwords there if you want to use a hoster.

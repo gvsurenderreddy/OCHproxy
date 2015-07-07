@@ -4,3 +4,4 @@ texttable
 shove
 requests
 pluginbase
+requests[security]
