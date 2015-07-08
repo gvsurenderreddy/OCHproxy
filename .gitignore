@@ -3,6 +3,7 @@ config.json
 users.txt
 ochload.log
 traffic_log
+.cache
 
 # Python bytecode
 *.pyc
