@@ -3,4 +3,4 @@ humanize
 texttable
 shove
 pluginbase
-requests[security]
+requests

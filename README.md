@@ -31,7 +31,7 @@ You need to install the header files for Python, libXML2 and libXSLT so that pip
     
 
 ## Usage
-Use `python2 ochload.py` to start the server. After the first run, a file named `config.json` is generated.
+Use `python2 ochproxy.py` to start the server. After the first run, a file named `config.json` is generated.
 You need to add your usernames and passwords there if you want to use a hoster.
 
 ## Supported hosters

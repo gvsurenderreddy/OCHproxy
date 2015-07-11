@@ -23,6 +23,6 @@ if Config.get("app/debug", False) is True:
 else:
     level = logging.ERROR
 socket.setdefaulttimeout(30)
-logging.basicConfig(filename="ochload.log", level=level)
-logging.info("Starting OCHload...")
+logging.basicConfig(filename="ochproxy.log", level=level)
+logging.info("Starting OCHproxy...")
 Server()

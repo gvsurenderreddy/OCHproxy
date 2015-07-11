@@ -1,7 +1,7 @@
 import random
 from modules import Request
 
-# This "plugin" is only used to measure the performance of OCHload.
+# This "plugin" is only used to measure the performance of OCHproxy.
 # You can only trigger it if you enable debug mode and use http://get.testfile/ as a link.
 
 # A list of download speed test links found publicly available on the Internet.
