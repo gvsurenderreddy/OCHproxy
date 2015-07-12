@@ -17,7 +17,7 @@ def get_default_headers():
             }
 
 
-class Request:
+class Request(object):
     cookies = {}
     headers = {}
 

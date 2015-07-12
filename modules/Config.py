@@ -7,7 +7,7 @@ import shutil
 CONFIG_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", 'config.json'))
 
 
-class Config:
+class Config(object):
     def __init__(self):
         pass
 

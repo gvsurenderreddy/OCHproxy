@@ -10,7 +10,7 @@ from modules.Hoster import Hoster
 from shove import Shove
 
 
-class Server:
+class Server(object):
     httpd = None
     hoster = None
     test = False

@@ -1,6 +1,6 @@
 
-class Auth:
-    class User:
+class Auth(object):
+    class User(object):
 
         def __init__(self, username, password):
             self.password = password

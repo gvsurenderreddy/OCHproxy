@@ -11,7 +11,7 @@ def configured(hoster):
     return True
 
 
-class Hoster:
+class Hoster(object):
     hoster = []
     plugin_source = None
     downloads = {}
