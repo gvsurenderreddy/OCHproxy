@@ -138,3 +138,6 @@ class Server:
                 if self.request_version != 'HTTP/0.9':
                     self.wfile.write("%s %d %s\r\n" %
                                      (self.protocol_version, code, message))
+
+        def send_error(self, code, message=None):
+            self.send_response(code, message)

@@ -102,8 +102,11 @@ class Request:
     def get_host_from_url(url):
         url = url.split("://")[1]
         url = url.split("/")[0]
-        if len(url.split(".", 1)[1]) > 5:
-            return url.split(".", 1)[1]
+        try:
+            if len(url.split(".", 1)[1]) > 5:
+                return url.split(".", 1)[1]
+        except IndexError:
+            pass
         return url
 
     def get_parametrized_url(self):
