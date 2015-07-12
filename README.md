@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.org/bauerj/OCHproxy.svg)](https://travis-ci.org/bauerj/OCHproxy)
 [![Code Climate](https://codeclimate.com/github/bauerj/OCHproxy/badges/gpa.svg)](https://codeclimate.com/github/bauerj/OCHproxy)
+[![Coverage Status](https://coveralls.io/repos/bauerj/OCHproxy/badge.svg?branch=master&service=github)](https://coveralls.io/github/bauerj/OCHproxy?branch=master)
+[![Code Health](https://landscape.io/github/bauerj/OCHproxy/master/landscape.svg?style=flat)](https://landscape.io/github/bauerj/OCHproxy/master)
 # OCHproxy
 OCHproxy is an API that eases downloading from one-click hosters.
 Using OCHproxy, you can share premium-accounts for one-click hosters with other people and get the following benefits:
