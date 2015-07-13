@@ -66,9 +66,9 @@ class BasePlugin(object):
         :return: True if this plugin can handle the link, False otherwise
         """
         try:
-            if isinstance(self.link_format, basestring):
-                self.link_format = [self.link_format]
-            for i in self.link_format:
+            if isinstance(BasePlugin.link_format, basestring):
+                BasePlugin.link_format = [BasePlugin.link_format]
+            for i in BasePlugin.link_format:
                 if re.search(i, link) is not None:
                     return True
         except (NameError, TypeError):

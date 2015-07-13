@@ -1,5 +1,6 @@
 import SocketServer
 import SimpleHTTPServer
+import json
 import logging
 import socket
 import urlparse
@@ -112,6 +113,21 @@ class Server(object):
             self.end_headers()
             with open("static/index.html") as f:
                 self.copyfile(f, self.wfile)
+
+        @needs_auth
+        def serve_links(self, user=None):
+            formats = []
+            for h in Hoster.hoster:
+                if isinstance(h.__class__.link_format, basestring):
+                    formats.append(h.__class__.link_format)
+                elif h.__class__.link_format is not None:
+                    formats += h.__class__.link_format
+            # distinct
+            formats = list(set(formats))
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(formats))
 
         def parse_params(self):
             try:
