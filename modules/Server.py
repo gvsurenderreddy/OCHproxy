@@ -75,7 +75,8 @@ class Server(object):
             user.connections -= 1
             download_details = (content_length, time.time() - start_time)
             Server.add_traffic_for("user", user.username, download_details)
-            Server.add_traffic_for("hoster", plugin, download_details)
+            Server.add_traffic_for("hoster", plugin.plugin_name, download_details)
+            plugin.add_downloaded_bytes(content_length)
 
         def send_handle_to_user(self, handle):
             self.send_response(200)
