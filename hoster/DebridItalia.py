@@ -1,3 +1,4 @@
+import json
 from modules import Request
 from modules.BasePlugin import *
 from modules.Config import Config
@@ -6,49 +7,16 @@ from modules.Config import Config
 class DebridItalia(BasePlugin):
     priority = Priority.MULTI_UNLIMITED
     config_values = ["user", "password"]
-    supported = [
-        "1Fichier.com",
-        "2Shared.com",
-        "4shared.com",
-        "Backin.net",
-        "Brazzers.com",
-        "Cloudzilla.to",
-        "Crockdown.com",
-        "Datafile.com",
-        "Depfile.com",
-        "Easybytez.com",
-        "Ex-Load.com",
-        "Extmatrix.com",
-        "Fileboom.com",
-        "Filemoney.com",
-        "Filesmonster.com",
-        "Fileparadox.in",
-        "Rapidsonic.com",
-        "FilePost.com",
-        "Filesflash.com",
-        "Filespace.com",
-        "Inclouddrive.com",
-        "Letitbit.net",
-        "Megashares.com",
-        "Netload",
-        "NowDownload.ch",
-        "Nowvideo.co",
-        "Rapidgator.net",
-        "Rockfile.eu",
-        "Ryushare.com",
-        "Salefiles.com",
-        "Secureupload.eu",
-        "Share-Online.biz",
-        "Storedeasy.com",
-        "Tusfiles.net",
-        "Uploaded.to",
-        "Uploaded.net",
-        "UploadRocket.net",
-        "Uptobox.com"
-    ]
 
     def __init__(self):
         super(DebridItalia, self).__init__()
+        # Debrid Italia only has a list of all hosts, no exact format for the links
+        r = Request.Request(url="http://debriditalia.com/api.php?hosts").send().text
+        r = "[" + r + "]"
+        hosts = json.loads(r)
+        for host in hosts:
+            regex = "https?://(www\.)?" + host + ".*"
+            DebridItalia.link_format.append(regex)
 
     @cache(10*60)
     def handle(self, link):

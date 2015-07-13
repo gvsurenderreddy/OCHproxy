@@ -24,10 +24,7 @@ def test_auth():
 def start_server(port):
     thread = threading.Thread(target=run, kwargs={"port": port})
     thread.start()
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    while sock.connect_ex(('127.0.0.1', port)) == 0:
-        time.sleep(0.1)
-    sock.close()
+    time.sleep(6)
 
 
 def run(port=8182):
