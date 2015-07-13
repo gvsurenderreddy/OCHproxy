@@ -1,5 +1,5 @@
 # Here be dragons!
-OCHproxy is currently in ?-stage and under active development. Please expect a few rough edges and bugs. 
+OCHproxy is currently in α-stage and under active development. Please expect a few rough edges and bugs. 
 It would be nice if you could test it and report any of these.
 
 -----
