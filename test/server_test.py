@@ -20,7 +20,7 @@ def test_auth():
 def start_server(port):
     thread = threading.Thread(target=run, kwargs={"port": port})
     thread.start()
-    time.sleep(1)
+    time.sleep(2)
 
 def run(port=8182):
     Server(test=True, port=port)

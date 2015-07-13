@@ -4,6 +4,7 @@ users.txt
 ochproxy.log
 traffic_log
 .cache
+docs/_*
 
 # Python bytecode
 *.pyc
