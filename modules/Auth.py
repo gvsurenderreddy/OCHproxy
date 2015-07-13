@@ -12,7 +12,7 @@ class Auth(object):
         with open('users.txt') as f:
             for x in f.readlines():
                 u, p = x.strip().split(":", 1)
-                user[u] = User(p, u)
+                user[u] = User(u, p)
     except (IOError, OSError):
         pass
 
