@@ -42,8 +42,9 @@ class Hoster(object):
                             "needs a", n + ". You need to add a", n, "for", p, "to config.json " \
                                                                                "to use the plugin."
 
-    def handle_link(self, link):
-        okay = [h for h in self.hoster if
+    @staticmethod
+    def handle_link(link):
+        okay = [h for h in Hoster.hoster if
                 h.match(link) and configured(h) and Config.get("hoster/" + h.plugin_name + "/active", False)]
         if len(okay) < 1:
             print "Can't handle link", link, "because no hoster wants to do it"
@@ -65,3 +66,5 @@ class Hoster(object):
             print priorized[0][1].plugin_name, "wasn't able to process", link
             return None
         return priorized[0][1], download
+
+Hoster()

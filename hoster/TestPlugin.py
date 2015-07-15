@@ -8,6 +8,7 @@ from modules import Request
 from modules.BasePlugin import *
 from modules.Config import Config
 
+
 class TestPlugin(BasePlugin):
     links = [
         "http://ovh.net/files/100Mio.dat",  # 100MB
@@ -37,3 +38,4 @@ class TestPlugin(BasePlugin):
     def handle(self, link):
         link = random.choice(self.links)
         return Request.Request(url=link)
+
