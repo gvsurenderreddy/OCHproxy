@@ -1,8 +1,7 @@
-import Cookie
 import json
 import urllib
 import urllib2
-import requests
+from cookielib import CookieJar
 from modules.Config import Config
 
 __author__ = 'bauerj'
@@ -22,6 +21,7 @@ def get_default_headers():
 class Request(object):
     cookies = {}
     headers = {}
+    cj = CookieJar()
 
     def __init__(self, url=None, payload=None, method="GET"):
         self.method = method
@@ -55,14 +55,11 @@ class Request(object):
         return self.payload
 
     def open(self):
-        opener = urllib2.build_opener(self.MyHTTPRedirectHandler)
-        host = Request.get_host_from_url(self.url)
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(Request.cj))
         headers = get_default_headers()
         opener.addheaders = []
         for (k, v) in dict(headers, **self.headers).iteritems():
             opener.addheaders.append((k, v))
-        opener.addheaders.append(
-            ('Cookie', "; ".join('%s=%s' % (k, v) for k, v in Request.get_cookies_for(host).items())))
         try:
             if self.get_method() == "GET":
                 r = opener.open(self.get_parametrized_url())
@@ -70,27 +67,10 @@ class Request(object):
                 r = opener.open(self.url, data=urllib.urlencode(self.payload))
         except urllib2.HTTPError, e:
             r = e
-        try:
-            cookies = r.info().getheader('Set-Cookie')
-            Request.set_cookies_from_header(cookies, host)
-        except AttributeError:
-            pass
         return r
 
     def send(self):
         return Request.Response(self.open())
-
-    @staticmethod
-    def set_cookie_for(host, name, value):
-        if host not in Request.cookies:
-            Request.cookies[host] = {}
-        Request.cookies[host][name] = value
-
-    @staticmethod
-    def get_cookies_for(host):
-        if host not in Request.cookies:
-            return {}
-        return Request.cookies[host]
 
     @staticmethod
     def get_host_from_url(url):
@@ -108,27 +88,6 @@ class Request(object):
         if len(self.payload) > 0:
             url = url + "?" + urllib.urlencode(self.payload)
         return url
-
-    class MyHTTPRedirectHandler(urllib2.HTTPRedirectHandler):
-        def __init__(self):
-            pass
-
-        def http_error_302(self, req, fp, code, msg, headers):
-            host = Request.get_host_from_url(req.get_full_url())
-            for h in headers:
-                if "set-cookie" == h.lower():
-                    Request.set_cookies_from_header(headers[h], host)
-            req.headers['Cookie'] = "; ".join('%s=%s' % (k, v) for k, v in Request.get_cookies_for(host).items())
-            return urllib2.HTTPRedirectHandler.http_error_302(self, req, fp, code, msg, headers)
-
-        http_error_301 = http_error_303 = http_error_307 = http_error_302
-
-    @staticmethod
-    def set_cookies_from_header(cookies, host):
-        cookies = Cookie.SimpleCookie(cookies)
-        for c in cookies.iteritems():
-            n, v = c
-            Request.set_cookie_for(host, n, v.value)
 
     class Response(object):
         def __init__(self, handle):
