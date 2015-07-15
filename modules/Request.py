@@ -1,10 +1,12 @@
 import Cookie
+import json
 import urllib
 import urllib2
 import requests
 from modules.Config import Config
 
 __author__ = 'bauerj'
+__all__ = ["Request"]
 
 
 def get_default_headers():
@@ -61,10 +63,13 @@ class Request(object):
             opener.addheaders.append((k, v))
         opener.addheaders.append(
             ('Cookie', "; ".join('%s=%s' % (k, v) for k, v in Request.get_cookies_for(host).items())))
-        if self.get_method() == "GET":
-            r = opener.open(self.get_parametrized_url())
-        else:
-            r = opener.open(self.url, data=self.payload)
+        try:
+            if self.get_method() == "GET":
+                r = opener.open(self.get_parametrized_url())
+            else:
+                r = opener.open(self.url, data=urllib.urlencode(self.payload))
+        except urllib2.HTTPError, e:
+            r = e
         try:
             cookies = r.info().getheader('Set-Cookie')
             Request.set_cookies_from_header(cookies, host)
@@ -73,18 +78,7 @@ class Request(object):
         return r
 
     def send(self):
-        host = Request.get_host_from_url(self.url)
-        headers = get_default_headers()
-        if not hasattr(requests, self.method.lower()):
-            raise Exception("Method should be either POST or GET")
-        m = getattr(requests, self.method.lower())
-        args = {"headers": headers, "cookies": Request.get_cookies_for(host),
-                "params" if self.method.lower() == "get" else "data": self.payload}
-        r = m(self.url, **args)
-        for r in [r] + r.history:
-            for n, v in r.cookies.iteritems():
-                Request.set_cookie_for(host, n, v)
-        return r
+        return Request.Response(self.open())
 
     @staticmethod
     def set_cookie_for(host, name, value):
@@ -135,3 +129,38 @@ class Request(object):
         for c in cookies.iteritems():
             n, v = c
             Request.set_cookie_for(host, n, v.value)
+
+    class Response(object):
+        def __init__(self, handle):
+            assert isinstance(handle, urllib.addinfourl)
+            self.handle = handle
+            self._text = None
+
+        @property
+        def text(self):
+            if self._text is not None:
+                return self._text
+            self._text = self.handle.read()
+            return self._text
+
+        @property
+        def status_code(self):
+            return self.handle.getcode()
+
+        @property
+        def size(self):
+            try:
+                return self.handle.info().getheaders("Content-Length")[0]
+            except AttributeError:
+                return len(self.text)
+
+        @property
+        def headers(self):
+            try:
+                return self.handle.info().getheaders()
+            except AttributeError:
+                return []
+
+        @property
+        def json(self):
+            return json.loads(self.text)

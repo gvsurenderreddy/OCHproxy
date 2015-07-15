@@ -30,15 +30,3 @@ class DebridItalia(BasePlugin):
         # TODO: Error codes
         self.deactivate()
         raise Errors.PluginError
-
-    def match(self, link):
-        # TODO
-        try:
-            hoster = link.split("://")[1]
-            hoster = hoster.split("/")[0]
-            hoster = hoster.strip("www.")
-            if str.upper(hoster) in map(str.upper, self.supported):
-                return self.handle(link) is not None
-        except IndexError:
-            return False
-        return False
