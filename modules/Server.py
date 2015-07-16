@@ -81,7 +81,8 @@ class Server(object):
                                      (self.protocol_version, code, message))
 
         def send_error(self, code, message=None):
-            self.send_response(code, message)
+            self.send_response(code)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
             self.end_headers()
             if message is not None:
                 self.wfile.write(message)
