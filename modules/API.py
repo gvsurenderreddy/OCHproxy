@@ -83,7 +83,7 @@ class v1(object):
                 formats += h.__class__.link_format
         # distinct
         formats = list(set(formats))
-        self.server.end_response(200)
+        self.server.send_response(200)
         self.server.send_header("Content-Type", "application/json")
         self.server.end_headers()
         self.server.wfile.write(json.dumps(formats))
