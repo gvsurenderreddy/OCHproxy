@@ -7,7 +7,7 @@ def needs_auth(func):
         user = Auth.auth(self.server.parse_params(), self.server.client_address)
         if user is None:
             self.server.print_debug("Request could not be authenticated")
-            self.server.send_error(401)
+            self.server.send_error(401, "Request could not be authenticated")
             return
         func(self, *args, user=user)
     return dec

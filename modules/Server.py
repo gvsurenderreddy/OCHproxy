@@ -30,7 +30,6 @@ class Server(object):
 
     class Proxy(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
-
         def print_debug(self, message):
             logging.debug("<Request from " + self.client_address[0] + ">: " + message)
 
@@ -83,3 +82,6 @@ class Server(object):
 
         def send_error(self, code, message=None):
             self.send_response(code, message)
+            self.end_headers()
+            if message is not None:
+                self.wfile.write(message)
