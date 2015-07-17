@@ -16,14 +16,15 @@ class Hoster(object):
     hoster = []
     downloads = {}
     handled = {}
+    plugin_source = None
 
     def __init__(self):
         plugin_base = PluginBase(package='hoster.plugins')
-        plugin_source = plugin_base.make_plugin_source(
+        Hoster.plugin_source = plugin_base.make_plugin_source(
             searchpath=['./hoster'])
-        with plugin_source:
-            for p in plugin_source.list_plugins():
-                h = plugin_source.load_plugin(p)
+        with Hoster.plugin_source:
+            for p in Hoster.plugin_source.list_plugins():
+                h = Hoster.plugin_source.load_plugin(p)
                 if not hasattr(h, p):
                     print "Plugin " + p + " is invalid (No class named " + p + "in module)"
                     continue
@@ -35,7 +36,7 @@ class Hoster(object):
                 if not Config.get("hoster/" + p + "/active", False):
                     continue
                 print "Loaded plugin " + p
-                self.hoster.append(h)
+                Hoster.hoster.append(h)
                 for n in h.config_values:
                     if not Config.get("hoster/" + p + "/" + n):
                         print "Hoster", p, \
