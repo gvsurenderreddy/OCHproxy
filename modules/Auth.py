@@ -1,3 +1,5 @@
+import os
+
 
 class Auth(object):
     class User(object):
@@ -7,17 +9,25 @@ class Auth(object):
             self.connections = 0
             self.username = username
 
-    user = {}
-    try:
-        with open('users.txt') as f:
-            for x in f.readlines():
-                u, p = x.strip().split(":", 1)
-                user[u] = User(u, p)
-    except (IOError, OSError):
-        pass
+    user = None
+    file_date = 0
+
+    @staticmethod
+    def load_users():
+        try:
+            if Auth.user is None or Auth.file_date is not os.stat('users.txt')[8]:
+                Auth.file_date = os.stat('users.txt')[8]
+                with open('users.txt') as f:
+                    for x in f.readlines():
+                        u, p = x.strip().split(":", 1)
+                        Auth.user[u] = Auth.User(u, p)
+        except (IOError, OSError):
+            print "could not load users.txt"
+            pass
 
     @staticmethod
     def auth(params, ip):
+        Auth.load_users()
         if "user" not in params or "password" not in params:
             return None
         if params["user"][0] not in Auth.user:

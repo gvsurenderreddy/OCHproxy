@@ -65,7 +65,7 @@ class Hoster(object):
                 i += 1
         if download is None:
             print priorized[0][1].plugin_name, "wasn't able to process", link
-            return None
+            raise PluginError
         return priorized[0][1], download
 
 Hoster()
