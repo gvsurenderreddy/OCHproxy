@@ -1,6 +1,7 @@
 import json
 import socket
 import time
+from modules import Errors
 from modules.Config import Config
 from modules.Decorators import needs_auth
 from modules.Hoster import Hoster
@@ -74,6 +75,15 @@ class v1(object):
             self.server.copyfile(f, self.server.wfile)
 
     @needs_auth
+    def serve_account(self, user=None):
+        response = {"status":
+                    {"active": True,
+                     "max_connections": Config.get("app/max_connections_per_user", 20)
+                     }
+                    }
+        self.server.wfile.write(json.dumps(response))
+
+    @needs_auth
     def serve_links(self, user=None):
         formats = []
         for h in Hoster.hoster:
@@ -87,5 +97,13 @@ class v1(object):
         self.server.send_header("Content-Type", "application/json")
         self.server.end_headers()
         self.server.wfile.write(json.dumps(formats))
+
+    def handle_exception(self, exception):
+        if not isinstance(exception, Errors.RequestError):
+            exception = Errors.RequestError
+        self.server.send_response(500)
+        self.server.send_header("Content-Type", "application/json")
+        self.server.end_headers()
+        self.server.wfile.write(json.dumps({"code": exception.code, "message": exception.message}))
 
 default = v1

@@ -47,7 +47,12 @@ class Server(object):
                 return
             if hasattr(endpoint, action) and hasattr(getattr(endpoint, action), "__call__"):
                 logging.debug("Request from " + self.client_address[0] + " calls " + action + " (" + api_version + ")")
-                getattr(endpoint, action)()
+                try:
+                    getattr(endpoint, action)()
+                except Exception, e:
+                    endpoint.handle_exception(e)
+                    logging.error("Exception:" + e.message)
+
             # If the test suite started this, we need to stop the server
             if Server.test:
                 Server.httpd.shutdown()

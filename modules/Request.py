@@ -55,6 +55,7 @@ class Request(object):
         return self.payload
 
     def open(self):
+        print "opening " + self.url
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(Request.cj))
         headers = get_default_headers()
         opener.addheaders = []
