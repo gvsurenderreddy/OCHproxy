@@ -1,5 +1,4 @@
 # coding=utf-8
-import re
 import time
 from modules import Errors
 from modules import Decorators
@@ -24,11 +23,8 @@ class BasePlugin(object):
     TODO: Logging?
 
     Class Attributes:
-        - `persist`:
-            A list of *instance* attributes you want to survive a reload.
-        - `link_format`:
-            Either a regular expression or a list of regular expressions that describe how links must look in order
-            to be handled by your plugin.
+        - `hostname`:
+            The hostname for which the plugin is responsible or a list of hostnames for which the plugin is responsible.
         - `priority`:
             A positive integer number. The smaller it is, the more likely will the plugin be chosen.
             To be more precise: The plugin with the lowest $priority * bytes downloaded$ will be chosen.
@@ -36,13 +32,13 @@ class BasePlugin(object):
         - `config_values`:
             A list of config values your plugin will use. Use a tuple in the format (key, value) to set a default value
             if it is optional. If a non-optional config item is not provided, your plugin will not be instantiated.
+
     """
 
-    persist = []
-    link_format = []
     priority = -1
     config_values = []
     cache = {}
+    hostname = []
 
     def __init__(self):
         """
@@ -51,28 +47,26 @@ class BasePlugin(object):
         If the login data is invalid, just deactivate forever, your plugin will be reloaded once the config values for
         it change.
         """
-        self.link_format = None
         self.deactivated_until = 0
         self.downloaded = 0
 
     def match(self, link):
         """
-        The preferred way to define which links your plugin can download is to define an instance attribute
-        `link-format` that contains a regular expression or a list of regular expressions that will match links your
-        plugin can handle.
-        You may override this method if you are not able to use regular expressions for these links but then clients
-        won't know if a link can be matched or not.
+        The preferred way to define which links your plugin can download is to define a class attribute
+        `hostname` that contains the hostname of hosters the plugin can download from.
+        You may override this method if you want to have finer control of the links that get passed to handle.
         :param link: A link
         :return: True if this plugin can handle the link, False otherwise
         """
-        try:
-            if isinstance(BasePlugin.link_format, basestring):
-                BasePlugin.link_format = [BasePlugin.link_format]
-            for i in BasePlugin.link_format:
-                if re.search(i, link) is not None:
+
+        if isinstance(BasePlugin.hostname, basestring):
+            BasePlugin.hostname = [BasePlugin.hostname]
+        for h in BasePlugin.hostname:
+            try:
+                if link.split("://", 1)[1].split("/", 1)[0].endswith(h):
                     return True
-        except (NameError, TypeError):
-            pass
+            except (NameError, TypeError, IndexError):
+                pass
         return False
 
     def handle(self, link):

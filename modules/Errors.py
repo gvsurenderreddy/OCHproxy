@@ -1,6 +1,7 @@
 class RequestError(Exception):
     message = "Unknown error occured"
     code = 1
+    http_code = 500
 
 
 class PluginError(RequestError):
@@ -11,6 +12,7 @@ class PluginError(RequestError):
 class NoSuchUserError(RequestError):
     message = "Wrong username or password"
     code = 3
+    http_code = 401
 
 
 class TemporarilyImpossibleError(RequestError):

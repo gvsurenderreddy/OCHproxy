@@ -2,6 +2,7 @@ import SocketServer
 import SimpleHTTPServer
 import logging
 import urlparse
+from modules import Errors
 from modules.Config import Config
 from shove import Shove
 
@@ -49,7 +50,7 @@ class Server(object):
                 logging.debug("Request from " + self.client_address[0] + " calls " + action + " (" + api_version + ")")
                 try:
                     getattr(endpoint, action)()
-                except Exception, e:
+                except Errors.RequestError, e:
                     endpoint.handle_exception(e)
                     logging.error("Exception:" + e.message)
 

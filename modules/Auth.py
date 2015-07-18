@@ -17,6 +17,7 @@ class Auth(object):
         try:
             if Auth.user is None or Auth.file_date is not os.stat('users.txt')[8]:
                 Auth.file_date = os.stat('users.txt')[8]
+                Auth.user = {}
                 with open('users.txt') as f:
                     for x in f.readlines():
                         u, p = x.strip().split(":", 1)
@@ -36,4 +37,3 @@ class Auth(object):
         if Auth.user[params["user"][0]].password != password:
             return None
         return Auth.user[params["user"][0]]
-

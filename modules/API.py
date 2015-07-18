@@ -87,10 +87,10 @@ class v1(object):
     def serve_links(self, user=None):
         formats = []
         for h in Hoster.hoster:
-            if isinstance(h.__class__.link_format, basestring):
-                formats.append(h.__class__.link_format)
-            elif h.__class__.link_format is not None:
-                formats += h.__class__.link_format
+            if isinstance(h.__class__.hostname, basestring):
+                formats.append(h.__class__.hostname)
+            elif h.__class__.hostname is not None:
+                formats += h.__class__.hostname
         # distinct
         formats = list(set(formats))
         self.server.send_response(200)
@@ -101,7 +101,7 @@ class v1(object):
     def handle_exception(self, exception):
         if not isinstance(exception, Errors.RequestError):
             exception = Errors.RequestError
-        self.server.send_response(500)
+        self.server.send_response(exception.http_code)
         self.server.send_header("Content-Type", "application/json")
         self.server.end_headers()
         self.server.wfile.write(json.dumps({"code": exception.code, "message": exception.message}))

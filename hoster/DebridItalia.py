@@ -10,13 +10,9 @@ class DebridItalia(BasePlugin):
 
     def __init__(self):
         super(DebridItalia, self).__init__()
-        # Debrid Italia only has a list of all hosts, no exact format for the links
         r = Request.Request(url="http://debriditalia.com/api.php?hosts").send().text
         r = "[" + r + "]"
-        hosts = json.loads(r)
-        for host in hosts:
-            regex = "https?://(www\.)?" + host + ".*"
-            DebridItalia.link_format.append(regex)
+        DebridItalia.hostname = json.loads(r)
 
     @cache(10*60)
     def handle(self, link):

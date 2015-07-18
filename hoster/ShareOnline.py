@@ -8,7 +8,7 @@ from pyquery import PyQuery
 
 
 class ShareOnline(BasePlugin):
-    link_format = "https?://(www\.)?share-online.biz/dl/(.*)$"
+    hostname = "share-online.biz"
     priority = Priority.DIRECT_UNLIMITED
     config_values = ["user", "password"]
 
