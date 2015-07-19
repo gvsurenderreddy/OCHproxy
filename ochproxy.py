@@ -21,7 +21,7 @@ if args.show_traffic:
     exit()
 
 try:
-    if os.geteuid == 0:
+    if os.geteuid() == 0:
         # Oh no, someone started OCHproxy as root!
         # But maybe we can drop the priviliges after getting the port.
         if Config.get("app/user", None) is None or Config.get("app/group", None) is None:
@@ -32,6 +32,7 @@ try:
             print "You need to wait at least 5 seconds if you insist on this reckless behaviour."
             for _i in xrange(1, 5):
                 print "."
+                time.sleep(1)
 except AttributeError:
     pass  # This is Windows.
 

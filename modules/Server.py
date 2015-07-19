@@ -34,7 +34,7 @@ class Server(object):
         Server.httpd = SocketServer.ThreadingTCPServer((ip, port), self.Proxy)
         print("Starting HTTP server on " + ip + " port " + str(port) + "...")
         try:
-            if os.geteuid != 0 or Config.get("app/user", None) is None or Config.get("app/group", None) is None:
+            if os.geteuid != 0 and Config.get("app/user") is None and Config.get("app/group") is None:
                 Server.drop_privileges(Config.get("app/user"), Config.get("app/group"))
         except AttributeError:
             pass
