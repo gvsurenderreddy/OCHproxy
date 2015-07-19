@@ -122,7 +122,8 @@ class BasePlugin(object):
         :param x: Number of Bytes just downloaded
         :return: Nothing
         """
-        self.downloaded += x
+        if x is not None:
+            self.downloaded += x
 
 
 class Priority(object):
