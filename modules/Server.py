@@ -33,7 +33,37 @@ class Server(object):
         ip = Config.get("http/ip", "0.0.0.0")
         Server.httpd = SocketServer.ThreadingTCPServer((ip, port), self.Proxy)
         print("Starting HTTP server on " + ip + " port " + str(port) + "...")
+        try:
+            if os.geteuid != 0 or Config.get("app/user", None) is None or Config.get("app/group", None) is None:
+                Server.drop_privileges(Config.get("app/user"), Config.get("app/group"))
+        except AttributeError:
+            pass
         Server.httpd.serve_forever()
+
+    @staticmethod
+    def drop_privileges(uid_name='nobody', gid_name='nogroup'):
+        try:
+            import os, pwd, grp
+        except (OSError, ImportError):
+            # This is Windows, I guess it won't be safe anyway.
+            return
+        if os.getuid() != 0:
+            # We're not root so, like, whatever dude
+            return
+
+        # Get the uid/gid from the name
+        running_uid = pwd.getpwnam(uid_name).pw_uid
+        running_gid = grp.getgrnam(gid_name).gr_gid
+
+        # Remove group privileges
+        os.setgroups([])
+
+        # Try setting the new uid/gid
+        os.setgid(running_gid)
+        os.setuid(running_uid)
+
+        # Ensure a very conservative umask
+        os.umask(077)
 
     class Proxy(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
