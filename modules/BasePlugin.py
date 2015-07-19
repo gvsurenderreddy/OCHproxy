@@ -59,9 +59,9 @@ class BasePlugin(object):
         :return: True if this plugin can handle the link, False otherwise
         """
 
-        if isinstance(BasePlugin.hostname, basestring):
-            BasePlugin.hostname = [BasePlugin.hostname]
-        for h in BasePlugin.hostname:
+        if isinstance(self.__class__.hostname, basestring):
+            self.__class__.hostname = [self.__class__.hostname]
+        for h in self.__class__.hostname:
             try:
                 if link.split("://", 1)[1].split("/", 1)[0].endswith(h):
                     return True

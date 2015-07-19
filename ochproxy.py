@@ -1,9 +1,8 @@
-import logging
 import socket
 from shove import Shove
 from modules import Stats
-from modules.Config import Config
 from modules.Server import Server
+from modules.Log import log
 import argparse
 
 parser = argparse.ArgumentParser(description='OCHproxy is an API that eases downloading from one-click hosters.')
@@ -18,11 +17,8 @@ if args.show_traffic:
         Stats.make_stats(traffic_data, name)
     exit()
 
-if Config.get("app/debug", False) is True:
-    level = logging.DEBUG
-else:
-    level = logging.ERROR
+
+log.info("Starting OCHproxy...")
+
 socket.setdefaulttimeout(30)
-logging.basicConfig(filename="ochproxy.log", level=level)
-logging.info("Starting OCHproxy...")
 Server()

@@ -1,12 +1,17 @@
 import SocketServer
 import SimpleHTTPServer
+import os
+import random
+import threading
 import urlparse
+import time
+import binascii
 from modules import Errors
 from modules.Config import Config
 from shove import Shove
-from easylogger import log
+from modules.Log import log, ServerLogAdapter, log_method
 
-@log
+
 def add_traffic_for(type, name, bytes):
     if type + "/" + name not in Server.traffic:
         Server.traffic[type + "/" + name] = bytes
@@ -21,17 +26,24 @@ class Server(object):
     traffic = None
 
     def __init__(self, test=False, port=None):
+        ServerLogAdapter.thread_local = threading.local()
         Server.traffic = Shove('file://traffic_log/')
         Server.test = test
         port = port or Config.get("http/port", 8080)
         ip = Config.get("http/ip", "0.0.0.0")
         Server.httpd = SocketServer.ThreadingTCPServer((ip, port), self.Proxy)
-        log.info("Starting HTTP server on " + ip + " port " + str(port) + "...")
+        print("Starting HTTP server on " + ip + " port " + str(port) + "...")
         Server.httpd.serve_forever()
 
     class Proxy(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
         def do_GET(self):
+            if Config.get("app/debug"):
+                ServerLogAdapter.thread_local.remote = self.client_address
+                ServerLogAdapter.thread_local.id = threading.current_thread().name.split("-")[1]
+                ServerLogAdapter.thread_local.started = time.time()
+                ServerLogAdapter.thread_local.user = "nobody"
+                log.debug("GET " + self.path + " {" + self.headers.headers.__repr__() + "}")
             api_version = "default"
             path = self.path
             if self.path.count('/') > 1:
@@ -49,8 +61,8 @@ class Server(object):
                     getattr(endpoint, action)()
                 except Errors.RequestError, e:
                     endpoint.handle_exception(e)
-                    log.error("Exception:" + e.message, e)
-
+            if hasattr(ServerLogAdapter.thread_local, "started"):
+                log.debug("Ended after " + str(time.time() - ServerLogAdapter.thread_local.started) + "s")
             # If the test suite started this, we need to stop the server
             if Server.test:
                 Server.httpd.shutdown()
@@ -72,7 +84,7 @@ class Server(object):
                 return False
             return True
 
-        @log
+        @log_method
         def send_response(self, code, message=None):
             self.log_request(code)
             if message is None:
@@ -84,7 +96,7 @@ class Server(object):
                     self.wfile.write("%s %d %s\r\n" %
                                      (self.protocol_version, code, message))
 
-        @log
+        @log_method
         def send_error(self, code, message=None):
             self.send_response(code)
             self.send_header("Content-Type", "text/html; charset=utf-8")

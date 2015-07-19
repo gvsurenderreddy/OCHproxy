@@ -3,6 +3,7 @@ import urllib
 import urllib2
 from cookielib import CookieJar
 from modules.Config import Config
+from modules.Log import log
 
 __author__ = 'bauerj'
 __all__ = ["Request"]
@@ -55,7 +56,7 @@ class Request(object):
         return self.payload
 
     def open(self):
-        print "opening " + self.url
+        log.debug("opening " + self.url)
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(Request.cj))
         headers = get_default_headers()
         opener.addheaders = []

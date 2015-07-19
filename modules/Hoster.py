@@ -2,6 +2,7 @@ from pluginbase import PluginBase
 from modules.BasePlugin import BasePlugin
 from modules.Config import Config
 from modules.Errors import PluginError
+from modules.Log import log
 
 
 def configured(hoster):
@@ -26,16 +27,16 @@ class Hoster(object):
             for p in Hoster.plugin_source.list_plugins():
                 h = Hoster.plugin_source.load_plugin(p)
                 if not hasattr(h, p):
-                    print "Plugin " + p + " is invalid (No class named " + p + "in module)"
+                    log.debug("Plugin " + p + " is invalid (No class named " + p + "in module)")
+                    continue
+                if not Config.get("hoster/" + p + "/active", False):
                     continue
                 h = getattr(h, p)()
                 h.plugin_name = p
                 if not isinstance(h, BasePlugin):
-                    print "Plugin " + p + " is invalid (Not extending BasePlugin)"
+                    log.error("Plugin " + p + " is invalid (Not extending BasePlugin)")
                     continue
-                if not Config.get("hoster/" + p + "/active", False):
-                    continue
-                print "Loaded plugin " + p
+                log.debug("Loaded plugin " + p)
                 Hoster.hoster.append(h)
                 for n in h.config_values:
                     if not Config.get("hoster/" + p + "/" + n):

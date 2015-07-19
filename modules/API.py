@@ -1,7 +1,7 @@
 import json
 import socket
 import time
-from easylogger import log
+from modules.Log import log, log_method
 from modules import Errors
 from modules.Config import Config
 from modules.Decorators import needs_auth
@@ -23,9 +23,7 @@ class v1(object):
         except TypeError:
             plugin = handle = None
         if handle is None:
-            log.error("Link handler returned None: ", link, plugin.__name__)
-            self.server.send_error(500, "The server was unable to process your request")
-            return
+            raise Errors.PluginError
         if user.connections >= Config.get("app/max_connections_per_user", 20):
             log.info("User", user.username, " has opened more than ", user.connections, "connections.")
             self.server.send_error(421)
@@ -39,7 +37,7 @@ class v1(object):
         add_traffic_for("hoster", plugin.plugin_name, download_details)
         plugin.add_downloaded_bytes(content_length)
 
-    @log
+    @log_method
     def send_handle_to_user(self, handle):
         self.server.send_response(200)
         for h in self.server.headers.headers:
@@ -97,7 +95,7 @@ class v1(object):
         self.server.end_headers()
         self.server.wfile.write(json.dumps(formats))
 
-    @log
+    @log_method
     def handle_exception(self, exception):
         if not isinstance(exception, Errors.RequestError):
             exception = Errors.RequestError

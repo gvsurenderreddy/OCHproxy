@@ -1,14 +1,16 @@
 import time
 from modules import Errors
 from modules.Auth import Auth
+from modules.Log import ServerLogAdapter, log
 
 
 def needs_auth(func):
     def dec(self, *args):
         user = Auth.auth(self.server.parse_params(), self.server.client_address)
         if user is None:
-            self.server.print_debug("Request could not be authenticated")
+            log.debug("Request could not be authenticated")
             raise Errors.NoSuchUserError
+        ServerLogAdapter.thread_local.user = user
         func(self, *args, user=user)
     return dec
 
