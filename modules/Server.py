@@ -1,12 +1,12 @@
 import SocketServer
 import SimpleHTTPServer
-import logging
 import urlparse
 from modules import Errors
 from modules.Config import Config
 from shove import Shove
+from easylogger import log
 
-
+@log
 def add_traffic_for(type, name, bytes):
     if type + "/" + name not in Server.traffic:
         Server.traffic[type + "/" + name] = bytes
@@ -26,13 +26,10 @@ class Server(object):
         port = port or Config.get("http/port", 8080)
         ip = Config.get("http/ip", "0.0.0.0")
         Server.httpd = SocketServer.ThreadingTCPServer((ip, port), self.Proxy)
-        logging.info("Starting HTTP server on " + ip + " port " + str(port) + "...")
+        log.info("Starting HTTP server on " + ip + " port " + str(port) + "...")
         Server.httpd.serve_forever()
 
     class Proxy(SimpleHTTPServer.SimpleHTTPRequestHandler):
-
-        def print_debug(self, message):
-            logging.debug("<Request from " + self.client_address[0] + ">: " + message)
 
         def do_GET(self):
             api_version = "default"
@@ -47,12 +44,12 @@ class Server(object):
                 self.send_error(501, "API-endpoint does not exist")
                 return
             if hasattr(endpoint, action) and hasattr(getattr(endpoint, action), "__call__"):
-                logging.debug("Request from " + self.client_address[0] + " calls " + action + " (" + api_version + ")")
+                log.debug("Request from " + self.client_address[0] + " calls " + action + " (" + api_version + ")")
                 try:
                     getattr(endpoint, action)()
                 except Errors.RequestError, e:
                     endpoint.handle_exception(e)
-                    logging.error("Exception:" + e.message)
+                    log.error("Exception:" + e.message, e)
 
             # If the test suite started this, we need to stop the server
             if Server.test:
@@ -75,6 +72,7 @@ class Server(object):
                 return False
             return True
 
+        @log
         def send_response(self, code, message=None):
             self.log_request(code)
             if message is None:
@@ -86,6 +84,7 @@ class Server(object):
                     self.wfile.write("%s %d %s\r\n" %
                                      (self.protocol_version, code, message))
 
+        @log
         def send_error(self, code, message=None):
             self.send_response(code)
             self.send_header("Content-Type", "text/html; charset=utf-8")

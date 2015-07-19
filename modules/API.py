@@ -1,6 +1,7 @@
 import json
 import socket
 import time
+from easylogger import log
 from modules import Errors
 from modules.Config import Config
 from modules.Decorators import needs_auth
@@ -15,7 +16,6 @@ class v1(object):
     @needs_auth
     def serve_get(self, user=None):
         if not self.server.require_params(["link"]):
-            self.server.print_debug("Request didn't contain a link to download")
             return
         link = self.server.parse_params()["link"]
         try:
@@ -23,11 +23,11 @@ class v1(object):
         except TypeError:
             plugin = handle = None
         if handle is None:
+            log.error("Link handler returned None: ", link, plugin.__name__)
             self.server.send_error(500, "The server was unable to process your request")
-            self.server.print_debug("Link handler returned None")
             return
         if user.connections >= Config.get("app/max_connections_per_user", 20):
-            self.server.print_debug("User has already " + str(user.connections) + " connections open, can't open more.")
+            log.info("User", user.username, " has opened more than ", user.connections, "connections.")
             self.server.send_error(421)
             return
         user.connections += 1
@@ -39,21 +39,20 @@ class v1(object):
         add_traffic_for("hoster", plugin.plugin_name, download_details)
         plugin.add_downloaded_bytes(content_length)
 
+    @log
     def send_handle_to_user(self, handle):
         self.server.send_response(200)
         for h in self.server.headers.headers:
             h = h.split(":", 1)
             if "Range" in h[0]:
-                self.server.print_debug("Forwarding range header " + h[0] + ":" + h[1])
+                log.debug("Forwarding range header " + h[0] + ":" + h[1])
                 handle.add_header(h[0], h[1])
-        self.server.print_debug("Opening connection to " + handle.get_url())
+        log.debug("Opening connection to " + handle.get_url())
         try:
             handle = handle.open()
         except socket.timeout:
-            self.server.print_debug("Upstream timeout")
             self.server.send_error(500, "Upstream timeout")
             return
-        self.server.print_debug("Connection established, forwarding headers to client...")
         cl = 0
         if hasattr(handle.info(), "headers"):
             headers = handle.info().headers
@@ -62,9 +61,8 @@ class v1(object):
                 if "Content-Length:" in h:
                     cl = int(h.split(":", 1)[1].strip())
         self.server.end_headers()
-        self.server.print_debug("Copying file to client")
+        log.debug("Copying file to client")
         self.server.copyfile(handle, self.server.wfile)
-        self.server.print_debug("Finished")
         return cl
 
     def serve_index(self):
@@ -93,11 +91,13 @@ class v1(object):
                 formats += h.__class__.hostname
         # distinct
         formats = list(set(formats))
+        formats.sort()
         self.server.send_response(200)
         self.server.send_header("Content-Type", "application/json")
         self.server.end_headers()
         self.server.wfile.write(json.dumps(formats))
 
+    @log
     def handle_exception(self, exception):
         if not isinstance(exception, Errors.RequestError):
             exception = Errors.RequestError
