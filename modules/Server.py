@@ -34,7 +34,7 @@ class Server(object):
         Server.httpd = SocketServer.ThreadingTCPServer((ip, port), self.Proxy)
         print("Starting HTTP server on " + ip + " port " + str(port) + "...")
         try:
-            if os.geteuid != 0 and Config.get("app/user") is None and Config.get("app/group") is None:
+            if os.geteuid != 0 and Config.get("app/user") is not None and Config.get("app/group") is not None:
                 Server.drop_privileges(Config.get("app/user"), Config.get("app/group"))
         except AttributeError:
             pass
@@ -76,15 +76,16 @@ class Server(object):
                 log.debug("GET " + self.path + " {" + self.headers.headers.__repr__() + "}")
             api_version = "default"
             path = self.path
-            if self.path.count('/') > 1:
+            if self.path.split("?", 1)[0].count('/') > 1:
                 api_version = self.path.lstrip("/").split("/", 1)[0]
                 path = self.path.lstrip("/").split("/", 1)[1]
             action = "serve_" + (path.split("?")[0].strip("/") or "index")
             try:
-                endpoint = getattr(Server.API, api_version)(self)
+                endpoint = getattr(Server.API, api_version)
             except AttributeError:
                 self.send_error(501, "API-endpoint does not exist")
                 return
+            endpoint = endpoint(self)
             if hasattr(endpoint, action) and hasattr(getattr(endpoint, action), "__call__"):
                 log.debug("Request from " + self.client_address[0] + " calls " + action + " (" + api_version + ")")
                 try:

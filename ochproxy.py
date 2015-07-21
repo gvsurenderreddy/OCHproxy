@@ -31,7 +31,7 @@ try:
             print "config.json for OCHproxy to use after binding the port."
             print "You need to wait at least 5 seconds if you insist on this reckless behaviour."
             for _i in xrange(1, 5):
-                print "."
+                print ".",
                 time.sleep(1)
 except AttributeError:
     pass  # This is Windows.
