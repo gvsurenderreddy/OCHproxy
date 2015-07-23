@@ -5,6 +5,7 @@ import re
 from modules.Request import Request
 from modules.Config import Config
 from pyquery import PyQuery
+from modules.Log import log
 
 
 class ShareOnline(BasePlugin):
@@ -41,12 +42,20 @@ class ShareOnline(BasePlugin):
                 return r
         logging.debug("Direct Download for Share-Online.biz is not enabled")
         response = PyQuery(h.read())
+        if len(response("#login-link")) > 0:
+            self.login()
+            h = r.open()
+            response = PyQuery(h.read())
+        if len(response("#choose_package")) > 0:
+            log.error("Share-online.biz account expired!")
+            self.deactivate()
+            raise Errors.PluginError
         link = response("#download script").text()
         if link is None:
-            raise Exception("invalid download link (ShareOnline)")
+            raise Errors.InvalidLinkError
         try:
             link = re.search("var dl.?=.?\"(.*?)\"", link).group(1)
             link = base64.b64decode(link)
         except IndexError:
-            raise Exception("Could not extract download link. Please consider enabling Direct Download")
+            log.error("Could not extract download link. Please consider enabling Direct Download")
         return Request(link)

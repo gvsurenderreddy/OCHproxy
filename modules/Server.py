@@ -1,11 +1,9 @@
 import SocketServer
 import SimpleHTTPServer
 import os
-import random
 import threading
 import urlparse
 import time
-import binascii
 from modules import Errors
 from modules.Config import Config
 from shove import Shove
@@ -19,7 +17,6 @@ def add_traffic_for(type, name, bytes):
         Server.traffic[type + "/" + name] += bytes
 
 class Server(object):
-    from modules import API
     httpd = None
 
     test = False
@@ -81,7 +78,8 @@ class Server(object):
                 path = self.path.lstrip("/").split("/", 1)[1]
             action = "serve_" + (path.split("?")[0].strip("/") or "index")
             try:
-                endpoint = getattr(Server.API, api_version)
+                from modules import API
+                endpoint = getattr(API, api_version)
             except AttributeError:
                 self.send_error(501, "API-endpoint does not exist")
                 return

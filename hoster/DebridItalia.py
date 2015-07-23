@@ -2,7 +2,7 @@ import json
 from modules import Request
 from modules.BasePlugin import *
 from modules.Config import Config
-
+from modules.Log import log
 
 class DebridItalia(BasePlugin):
     priority = Priority.MULTI_UNLIMITED
@@ -23,6 +23,7 @@ class DebridItalia(BasePlugin):
             'u': Config.get("user")}).send()
         if "ERROR:" not in r.text:
             return Request.Request(url=r.text.strip())
-        # TODO: Error codes
-        self.deactivate()
+        if "account_expired" in r.text:
+            log.error("debriditalia.com account expired!")
+            self.deactivate()
         raise Errors.PluginError
