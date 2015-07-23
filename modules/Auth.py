@@ -15,7 +15,7 @@ class Auth(object):
     @staticmethod
     def load_users():
         try:
-            if Auth.user is None or Auth.file_date is not os.stat('users.txt')[8]:
+            if Auth.user is None or Auth.file_date < os.stat('users.txt')[8]:
                 Auth.file_date = os.stat('users.txt')[8]
                 Auth.user = {}
                 with open('users.txt') as f:

@@ -2,7 +2,7 @@ import hashlib
 import os
 import tempfile
 import pytest
-from modules import Config
+from modules.Config import Config
 
 
 def setup_module(module):
@@ -11,32 +11,32 @@ def setup_module(module):
 
 def test_none():
     with pytest.raises(TypeError):
-        Config.Config.get(None)
+        Config.get(None)
 
 
 def test_unset():
-    assert Config.Config.get("q/q") is None
+    assert Config.get("q/q") is None
 
 
 def test_path():
     json = '{"test": {"path": true}}'
     with open(Config.CONFIG_PATH, "w") as f:
         f.write(json)
-    assert Config.Config.get("test/path") is True
+    assert Config.get("test/path") is True
 
 
 def test_getall():
-    Config.Config.get_all()
+    Config.get_all()
 
 
 def test_set():
-    Config.Config.set("q/w/e", True)
-    assert Config.Config.get("q/w/e") is True
+    Config.set("q/w/e", True)
+    assert Config.get("q/w/e") is True
 
 
 def test_save():
     x = get_config_hash()
-    Config.Config.set("foo/var", "raw")
+    Config.set("foo/var", "raw")
     y = get_config_hash()
     assert x != y
 

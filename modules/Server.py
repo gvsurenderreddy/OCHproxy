@@ -65,12 +65,11 @@ class Server(object):
     class Proxy(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
         def do_GET(self):
-            if Config.get("app/debug"):
-                ServerLogAdapter.thread_local.remote = self.client_address
-                ServerLogAdapter.thread_local.id = threading.current_thread().name.split("-")[1]
-                ServerLogAdapter.thread_local.started = time.time()
-                ServerLogAdapter.thread_local.user = "nobody"
-                log.debug("GET " + self.path + " {" + self.headers.headers.__repr__() + "}")
+            ServerLogAdapter.thread_local.remote = self.client_address
+            ServerLogAdapter.thread_local.id = threading.current_thread().name.split("-")[1]
+            ServerLogAdapter.thread_local.started = time.time()
+            ServerLogAdapter.thread_local.user = "nobody"
+            log.debug("GET " + self.path + " {" + self.headers.headers.__repr__() + "}")
             api_version = "default"
             path = self.path
             if self.path.split("?", 1)[0].count('/') > 1:

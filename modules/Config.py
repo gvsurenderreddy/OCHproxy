@@ -4,10 +4,10 @@ import os
 import re
 import shutil
 
-CONFIG_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", 'config.json'))
-
 
 class Config(object):
+    CONFIG_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", 'config.json'))
+
     def __init__(self):
         pass
 
@@ -30,22 +30,22 @@ class Config(object):
     @staticmethod
     def get_all():
         try:
-            if Config.config is None or Config.config_changed is not os.stat(CONFIG_PATH)[8]:
-                with open(CONFIG_PATH) as config_file:
+            if Config.config is None or Config.config_changed < os.stat(Config.CONFIG_PATH)[8]:
+                with open(Config.CONFIG_PATH) as config_file:
                     Config.config = json.load(config_file)
-                    Config.config_changed = os.stat(CONFIG_PATH)[8]
+                    Config.config_changed = os.stat(Config.CONFIG_PATH)[8]
             return Config.config
         except ValueError:
             print "ATTENTION: config.json did not contain valid json. The config file will be recreated"
             print "A backup of the current file can be found in config.json.invalid"
-            shutil.copyfile(CONFIG_PATH, CONFIG_PATH + ".invalid")
+            shutil.copyfile(Config.CONFIG_PATH, Config.CONFIG_PATH + ".invalid")
         except (IOError, OSError):
             pass
         return {}
 
     @staticmethod
     def save(c):
-        with open(CONFIG_PATH, 'w') as config_file:
+        with open(Config.CONFIG_PATH, 'w') as config_file:
             json.dump(c, config_file, indent=4)
 
     @staticmethod

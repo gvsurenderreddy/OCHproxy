@@ -7,7 +7,7 @@ class ServerLogAdapter(logging.LoggerAdapter):
     thread_local = None
 
     def process(self, msg, kwargs):
-        if ServerLogAdapter.thread_local is None or not Config.get("app/debug", False):
+        if ServerLogAdapter.thread_local is None or Config.get("app/debug", False) is not False:
             return msg, kwargs
         return '<Request#%s from %s (%s)> %s' % (ServerLogAdapter.thread_local.id,
                                                  ServerLogAdapter.thread_local.remote[0],
