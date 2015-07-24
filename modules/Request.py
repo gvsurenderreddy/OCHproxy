@@ -49,6 +49,10 @@ class Request(object):
         return self.url or ""
 
     def set_payload(self, payload):
+        self.payload = urllib.urlencode(payload)
+        return self
+
+    def set_raw_payload(self, payload):
         self.payload = payload
         return self
 
@@ -66,7 +70,7 @@ class Request(object):
             if self.get_method() == "GET":
                 r = opener.open(self.get_parametrized_url())
             else:
-                r = opener.open(self.url, data=urllib.urlencode(self.payload))
+                r = opener.open(self.url, data=self.payload)
         except urllib2.HTTPError, e:
             r = e
         return r
