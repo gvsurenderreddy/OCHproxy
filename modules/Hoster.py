@@ -1,4 +1,5 @@
 from pluginbase import PluginBase
+import time
 from modules.BasePlugin import BasePlugin
 from modules.Config import Config
 from modules.Errors import PluginError
@@ -53,20 +54,25 @@ class Hoster(object):
             return None
         priorized = []
         for hoster in okay:
-            priorized.append((hoster.priority * hoster.get_downloaded_bytes(), hoster))
+            priorized.append(((hoster.priority * hoster.get_downloaded_bytes()) + (10 * hoster.get_badness()), hoster))
         priorized = sorted(priorized, key=lambda x: x[0])
         # Try all plugins until there is no plugin left
         i = 0
         download = None
+        wasted = {}
         while i < len(priorized):
+            start = time.time()
             try:
                 download = priorized[i][1].handle(link)
                 break
             except PluginError:
                 i += 1
+            wasted[priorized[i][1]] = (time.time() - start)
         if download is None:
             print priorized[0][1].plugin_name, "wasn't able to process", link
             raise PluginError
+        for k, v in wasted.iteritems():
+            k.add_badness(v)
         return priorized[0][1], download
 
 Hoster()

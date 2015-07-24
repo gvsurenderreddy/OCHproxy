@@ -49,6 +49,7 @@ class BasePlugin(object):
         """
         self.deactivated_until = 0
         self.downloaded = 0
+        self.badness = 0
 
     def match(self, link):
         """
@@ -124,6 +125,22 @@ class BasePlugin(object):
         """
         if x is not None:
             self.downloaded += x
+
+    def add_badness(self, x):
+        """
+        Add x seconds to the "badness" counter.
+        This is automatically called, whenever a PluginError deferred the download by x seconds.
+        :param x: number of seconds the plugin wasted
+        :return: None
+        """
+        self.badness += x
+
+    def get_badness(self):
+        """
+        Get the current badness-level.
+        :return: int badness
+        """
+        return self.badness or 0
 
 
 class Priority(object):
