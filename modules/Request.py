@@ -28,7 +28,7 @@ class Request(object):
     def __init__(self, url=None, payload=None, method="GET"):
         self.method = method
         self.url = url
-        self.payload = payload or {}
+        self.set_payload(payload or {})
         self.headers = {}
 
     def set_method(self, method):
@@ -94,7 +94,6 @@ class Request(object):
             return self.open()
         api = ServerLogAdapter.thread_local.api
         return api.open_request_for_user(self)
-
 
     def send(self):
         return Request.Response(self.open())

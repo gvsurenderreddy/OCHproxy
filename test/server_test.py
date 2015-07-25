@@ -21,17 +21,19 @@ def test_auth():
     r = Request(url="http://localhost:8183/get?link=123").send()
     assert r.status_code != 200
 
+@pytest.mark.timeout(20)
 def test_account():
     start_server(8184)
     r = Request(url="http://localhost:8184/account?user=admin&password=123123").send()
     assert r.status_code == 200
 
+@pytest.mark.timeout(20)
 def test_links():
     start_server(8185)
     r = Request(url="http://localhost:8185/links?user=admin&password=123123").send()
     assert r.status_code == 200
 
-
+@pytest.mark.timeout(20)
 def test_get():
     start_server(8186)
     Request(url="http://localhost:8186/get?user=admin&password=123123&link=http://get.testfile/8184").open()
