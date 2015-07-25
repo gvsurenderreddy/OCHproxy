@@ -21,6 +21,8 @@ class Hoster(object):
     plugin_source = None
 
     def __init__(self):
+        if Hoster.plugin_source is not None:
+            return
         plugin_base = PluginBase(package='hoster.plugins')
         Hoster.plugin_source = plugin_base.make_plugin_source(
             searchpath=['./hoster'])
@@ -30,7 +32,7 @@ class Hoster(object):
                 if not hasattr(h, p):
                     log.debug("Plugin " + p + " is invalid (No class named " + p + "in module)")
                     continue
-                if not Config.get("hoster/" + p + "/active", False):
+                if not Config.get("hoster/" + p + "/active", True):
                     continue
                 h = getattr(h, p)()
                 h.plugin_name = p

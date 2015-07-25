@@ -7,6 +7,7 @@ import time
 from modules import Errors
 from modules.Config import Config
 from shove import Shove
+from modules.Hoster import Hoster
 from modules.Log import log, ServerLogAdapter, log_method
 
 
@@ -35,6 +36,7 @@ class Server(object):
                 Server.drop_privileges(Config.get("app/user"), Config.get("app/group"))
         except AttributeError:
             pass
+        Hoster()
         Server.httpd.serve_forever()
 
     @staticmethod
@@ -83,6 +85,7 @@ class Server(object):
                 self.send_error(501, "API-endpoint does not exist")
                 return
             endpoint = endpoint(self)
+            ServerLogAdapter.thread_local.api = endpoint
             if hasattr(endpoint, action) and hasattr(getattr(endpoint, action), "__call__"):
                 log.debug("Request from " + self.client_address[0] + " calls " + action + " (" + api_version + ")")
                 try:

@@ -96,7 +96,8 @@ class BasePlugin(object):
         if how_long is None:
             # float(inf) is bigger than any number
             self.deactivated_until = float("inf")
-        self.deactivated_until = time.time() + how_long
+        else:
+            self.deactivated_until = time.time() + how_long
 
     def is_active(self):
         """

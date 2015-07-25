@@ -17,8 +17,8 @@ class PremiumTo(BasePlugin):
             self.deactivate()
 
     def login(self):
-        r = Request.Request("http://premium.to/login.php")
-        r.add_header('Content-Type', 'application-json')
+        r = Request.Request("http://premium.to/login.php", method="POST")
+        r.add_header('Content-Type', 'application/json')
         r.add_header('Origin', 'http://premium.to')
         r.add_header('Referer', 'http://premium.to')
         r.set_raw_payload(json.dumps({
@@ -34,7 +34,7 @@ class PremiumTo(BasePlugin):
         request_link = "http://premium.to/getfile.php?link=" + link.split("://", 1)[1]
         r = Request.Request(request_link)
         r.add_header('Referer', 'http://premium.to')
-        h = r.open()
+        h = r.open_for_user()
         # If there is any error, premium.to will send a 200 response.
         # (I guess they couldn't remember the function for setting response codes or whatever).
         if h.geturl() is not request_link:

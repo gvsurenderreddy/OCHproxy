@@ -1,9 +1,10 @@
+# coding=utf-8
 import json
 import urllib
 import urllib2
 from cookielib import CookieJar
 from modules.Config import Config
-from modules.Log import log
+from modules.Log import log, ServerLogAdapter
 
 __author__ = 'bauerj'
 __all__ = ["Request"]
@@ -35,7 +36,7 @@ class Request(object):
         return self
 
     def add_header(self, header, value):
-        self.headers[header] = value
+        self.headers[header.lower()] = value
         return self
 
     def get_method(self):
@@ -53,13 +54,25 @@ class Request(object):
         return self
 
     def set_raw_payload(self, payload):
-        self.payload = payload
+        self.payload = payload  # urllib.quote(payload)
         return self
 
     def get_payload(self):
         return self.payload
 
     def open(self):
+        # We need to patch urllib2s if we want to set a Content-Type on our own. (╯°□°）╯︵ ┻━┻
+        original = urllib2.Request.__init__
+        if "content-type" in self.headers and self.method is "POST":
+
+            def i(*args, **kwargs):
+                if "headers" not in kwargs:
+                    kwargs["headers"] = {}
+                kwargs["headers"]["content-type"] = self.headers["content-type"]
+                original(*args, **kwargs)
+
+            urllib2.Request.__init__ = i
+
         log.debug("opening " + self.url)
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(Request.cj))
         headers = get_default_headers()
@@ -73,7 +86,15 @@ class Request(object):
                 r = opener.open(self.url, data=self.payload)
         except urllib2.HTTPError, e:
             r = e
+        urllib2.Request.__init__ = original
         return r
+
+    def open_for_user(self):
+        if not hasattr(ServerLogAdapter.thread_local, "api"):
+            return self.open()
+        api = ServerLogAdapter.thread_local.api
+        return api.open_request_for_user(self)
+
 
     def send(self):
         return Request.Response(self.open())
@@ -92,7 +113,7 @@ class Request(object):
     def get_parametrized_url(self):
         url = self.url
         if len(self.payload) > 0:
-            url = url + "?" + urllib.urlencode(self.payload)
+            url = url + "?" + self.payload
         return url
 
     class Response(object):

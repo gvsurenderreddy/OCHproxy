@@ -6,6 +6,7 @@ from modules import Errors
 from modules.Config import Config
 from modules.Decorators import needs_auth
 from modules.Hoster import Hoster
+from modules.Request import Request
 from modules.Server import add_traffic_for
 
 
@@ -40,17 +41,8 @@ class v1(object):
     @log_method
     def send_handle_to_user(self, handle):
         self.server.send_response(200)
-        for h in self.server.headers.headers:
-            h = h.split(":", 1)
-            if "Range" in h[0]:
-                log.debug("Forwarding range header " + h[0] + ":" + h[1])
-                handle.add_header(h[0], h[1])
-        log.debug("Opening connection to " + handle.get_url())
-        try:
-            handle = handle.open()
-        except socket.timeout:
-            self.server.send_error(500, "Upstream timeout")
-            return
+        if isinstance(handle, Request):
+            handle = self.open_request_for_user(handle)
         cl = 0
         if hasattr(handle.info(), "headers"):
             headers = handle.info().headers
@@ -62,6 +54,20 @@ class v1(object):
         log.debug("Copying file to client")
         self.server.copyfile(handle, self.server.wfile)
         return cl
+
+    def open_request_for_user(self, handle):
+        for h in self.server.headers.headers:
+            h = h.split(":", 1)
+            if "Range" in h[0] or "If-" in h[0]:
+                log.debug("Forwarding header " + h[0] + ":" + h[1])
+                handle.add_header(h[0], h[1])
+        log.debug("Opening connection to " + handle.get_url())
+        try:
+            handle = handle.open()
+        except socket.timeout:
+            self.server.send_error(500, "Upstream timeout")
+            raise Errors.PluginError
+        return handle
 
     def serve_index(self):
         self.server.send_response(200)
