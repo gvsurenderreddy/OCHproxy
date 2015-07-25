@@ -33,11 +33,6 @@ def test_links():
     r = Request(url="http://localhost:8185/links?user=admin&password=123123").send()
     assert r.status_code == 200
 
-@pytest.mark.timeout(20)
-def test_get():
-    start_server(8186)
-    Request(url="http://localhost:8186/get?user=admin&password=123123&link=http://get.testfile/8184").open()
-
 
 def start_server(port, execute=None):
     thread = threading.Thread(target=execute or run, kwargs={"port": port})
