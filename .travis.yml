@@ -5,7 +5,9 @@ python:
   - pypy
 matrix:
     allow_failures:
-        - python: pypy
+        - python:
+          - pypy
+          - "2.6"
 # command to install dependencies
 install:
   - "pip install -r requirements.txt --use-mirrors"
