@@ -3,4 +3,3 @@ humanize
 texttable
 shove
 pluginbase
-requests

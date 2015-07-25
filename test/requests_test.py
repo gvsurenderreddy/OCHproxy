@@ -1,6 +1,5 @@
 from urllib2 import URLError
 import pytest
-from requests import ConnectionError
 from modules.Request import Request
 
 
