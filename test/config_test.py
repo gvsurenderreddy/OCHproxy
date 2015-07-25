@@ -22,6 +22,8 @@ def test_path():
     json = '{"test": {"path": true}}'
     with open(Config.CONFIG_PATH, "w") as f:
         f.write(json)
+    Config.config_changed = -1
+    Config.config = None
     assert Config.get("test/path") is True
 
 
