@@ -68,8 +68,8 @@ class Hoster(object):
                 download = priorized[i][1].handle(link)
                 break
             except PluginError:
+                wasted[priorized[i][1]] = (time.time() - start)
                 i += 1
-            wasted[priorized[i][1]] = (time.time() - start)
         if download is None:
             print priorized[0][1].plugin_name, "wasn't able to process", link
             raise PluginError
