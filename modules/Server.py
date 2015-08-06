@@ -42,7 +42,7 @@ class Server(object):
     @staticmethod
     def drop_privileges(uid_name='nobody', gid_name='nogroup'):
         try:
-            import os, pwd, grp
+            import pwd, grp
         except (OSError, ImportError):
             # This is Windows, I guess it won't be safe anyway.
             return

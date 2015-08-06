@@ -29,7 +29,7 @@ Currently, this is the best way to install OCHproxy:
 4. Create a file named `users.txt` and add at least one line in the format `username:password`.
 4. Run `ochproxy.py` a file named config.json will be generated. You will need to add at least one account there.
 4. Restart ochproxy.
-4. Open http://localhost:8081/
+4. Open http://localhost:8080/
 
 
 ## FAQ
@@ -37,9 +37,22 @@ Currently, this is the best way to install OCHproxy:
 
     src/lxml/lxml.etree.c:16:20: fatal error: Python.h: Not found
     
-You need to install the header files for Python, libXML2 and libXSLT so that pip can compile `pyquery`.
+You need to install the header files for Python, libXML2 and libXSLT so that pip can compile `pyquery`. Sadly, pip
+is unable to provide these.
 
-    apt-get install libxml2-dev libxslt1-dev python-dev
+    apt-get install libxml2-dev libxslt1-dev python-dev zlib1g-dev
+    
+*I get a message like this: 
+`URLError: <urlopen error [Errno -2] Name or service not known> (file "/usr/lib/python2.7/urllib2.py", line 1181, in do_open)`.
+ How can I fix it?*
+ 
+This error occurs whenever OCHproxy tries to open a website that's using HTTPS and SNI. If you run
+
+    python -c 'import ssl; print ssl.HAS_SNI'
+
+and the result is not `True`, it means that your ssl module has no SNI support. That's fine if you can reach all
+hosters through HTTP but if they force HTTPS (or you want to use it) your best option is to update Python to a more
+recent version.
     
 
 ## Usage
@@ -52,6 +65,6 @@ Look in the `hoster` directory for a list of supported hosters.
 ## Run the tests
 To run the tests, you need to install py.test:
 
-    pip install py.test
+    pip install pytest
     
 Then you can just run `py.test` and see if the tests are running as they are supposed to.
