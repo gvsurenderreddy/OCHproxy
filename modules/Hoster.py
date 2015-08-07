@@ -7,9 +7,11 @@ from modules.Log import log
 
 
 def configured(hoster):
+    if not type(hoster) is type:
+        hoster = hoster.__class__
     need = hoster.config_values
     for n in need:
-        if not Config.get("hoster/" + hoster.plugin_name + "/" + n):
+        if not Config.get("hoster/" + hoster.__name__ + "/" + n):
             return False
     return True
 
@@ -34,7 +36,11 @@ class Hoster(object):
                     continue
                 if not Config.get("hoster/" + p + "/active", True):
                     continue
-                h = getattr(h, p)()
+                h = getattr(h, p)
+                if not configured(h):
+                    log.error("Plugin " + h.__name__ + " is activated but not configured. Deactivating.")
+                    continue
+                h = h()
                 h.plugin_name = p
                 if not isinstance(h, BasePlugin):
                     log.error("Plugin " + p + " is invalid (Not extending BasePlugin)")
