@@ -1,7 +1,4 @@
 from modules.BasePlugin import *
-import base64
-import logging
-import re
 from modules.Request import Request
 from modules.Config import Config
 from pyquery import PyQuery
@@ -56,7 +53,7 @@ class UploadedTo(BasePlugin):
             log.error("ul.to: Could not find download link please consider enabling ddl.")
             raise Errors.PluginError
         link = html("#download form").attr("action")
-        r =  Request(link, method="POST", payload={})
+        r = Request(link, method="POST", payload={})
         r.add_header("Referer", link)
         return self.try_dl(r)
 

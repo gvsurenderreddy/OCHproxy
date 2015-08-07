@@ -1,4 +1,7 @@
 class RequestError(Exception):
+    def __init__(self, **kwargs):
+        for (k, v) in kwargs.iteritems():
+            setattr(self, k, v)
     message = "Unknown error occured"
     code = 1
     http_code = 500

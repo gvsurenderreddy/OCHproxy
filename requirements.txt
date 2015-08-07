@@ -3,3 +3,4 @@ humanize
 texttable
 shove
 pluginbase
+pbkdf2
